@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Capstone Card Game</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="player_1">Player 1</string>
+    <string name="player_2">Player 2</string>
+    <string name="player_3">Player 3</string>
+    <string name="player_4">Player 4</string>
+    <string name="menu_1">Attack</string>
+    <string name="menu_2">Pass Turn</string>
+    <string name="menu_3">View Hand</string>
+    <string name="menu_4">View Tables</string>
+    <string name="card">A game card. Could be a card in the players hand, 
+        or a card on any players table. Also used for the deck and the 
+        discard pile.</string>
+    <string name="popupimage">The currently selected cards image.</string>
+
+</resources>

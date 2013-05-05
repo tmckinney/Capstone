@@ -1,0 +1,27 @@
+BEGIN TRANSACTION;
+CREATE TABLE ItemTrap (itemID NUMERIC, _id INTEGER PRIMARY KEY, itemTrapName TEXT, itemTrapDisc TEXT, itemAffects TEXT, itemTrapPower NUMERIC, itemTrapOneTime NUMERIC, itemTrapImage BLOB);
+INSERT INTO ItemTrap VALUES(101,1,'Potion of Health','Potion will restore HP to the user.  Also can be used as a stylish hair gel.','Heal',10,1,'PNG
+
+');
+INSERT INTO ItemTrap VALUES(102,2,'Potion of Mana Restore','Restores 10 points of mana','Mana Restore',10,1,'PNG
+
+');
+INSERT INTO ItemTrap VALUES(103,3,'Major Potion of Health','Potion will restore 20 HP.  Side affects may include: vomiting, neuasea, diaria, constapation, and/or hair loss','Heal',20,1,'ÿØÿà');
+INSERT INTO ItemTrap VALUES(104,4,'Bitter Bomb','Bomb that has been jaded and scorned by a lost love... Okay, maybe its just a bomb with a no love sign painted on it.',NULL,15,1,'ÿØÿà');
+CREATE TABLE Monsters (Monster_Image BLOB, MonsterName TEXT, MonsterID NUMERIC, _id INTEGER PRIMARY KEY, MonsterDiscription TEXT, MonsterHP TEXT, MonsterType TEXT, MonsterAttack NUMERIC, MonsterDefenseRegenRate NUMERIC, MonsterReward NUMERIC);
+INSERT INTO Monsters VALUES('PNG
+
+','Nerd Zombie',1,1,'This guy spent his mortal days 
+sitting on the couch, eating 
+Cheetoes, and playing Left 4 Dead 
+and watching Zombieland. He has
+ plenty of expierience acting like 
+a mindless glutton. ',50,'Undead',10,0,100);
+INSERT INTO Monsters VALUES('PNG
+
+','Fire Spirit',2,2,'Hot Headed element hell bent to torch you!',25,'Fire Elemental',8,2,115);
+INSERT INTO Monsters VALUES('PNG
+
+','Ice Spirit',3,3,'Cold Blooded, this element is not afraid to give anyone the cold shoulder.  Having icewater in its blood it is not afraid to deal a little frostbite out.  NOTE:  This thing is not warm.',25,'Ice Elemental',8,2,115);
+INSERT INTO Monsters VALUES('ÿØÿà','Ytsorf',4,4,'A diabolic snowman out for no good.  Unlike his happy go lucky cousin of which I dare not speak in case he may hear it and go berserk (lets just say its a lot like his name in reverse), Ytsorf is out for revenge on all the children that made fun of his butcher knife nose and turd pellet mouth',80,'Ice Elemental',12,0,150);
+COMMIT;
