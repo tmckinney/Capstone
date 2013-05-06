@@ -69,4 +69,6 @@ public interface DatabaseInterface {
 	/* The image that is to be used for the car. */
 	static final String I_IMAGE         = "itemTrapImage";
 
+	static final String EFFECT          = "effect";
+
 }

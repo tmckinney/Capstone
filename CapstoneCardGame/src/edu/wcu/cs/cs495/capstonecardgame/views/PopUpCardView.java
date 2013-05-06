@@ -2,10 +2,12 @@ package edu.wcu.cs.cs495.capstonecardgame.views;
 
 import edu.wcu.cs.cs495.capstonecardgame.activities.CardGame;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
+import edu.wcu.cs.cs495.capstonecardgame.R;
 import android.content.Context;
 import android.graphics.Color;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 /** 
@@ -34,6 +36,8 @@ public class PopUpCardView extends LinearLayout {
 	
 	/** Structure holding all of the cards info. */
 	protected LinearLayout info;
+	
+	protected ScrollView scroller;
 
 	/** 
 	 * Simple constructor to use when creating a view from code.
@@ -44,6 +48,8 @@ public class PopUpCardView extends LinearLayout {
 	public PopUpCardView(Context context) {
 		super(context);
 		this.setOrientation(HORIZONTAL);
+		
+		scroller = new ScrollView(context);
 
 		info = new LinearLayout(context);
 		info.setOrientation(VERTICAL);
@@ -73,7 +79,8 @@ public class PopUpCardView extends LinearLayout {
 
 		
 		this.addView(imageView);
-		this.addView(info);
+		this.addView(scroller);
+		scroller.addView(info);
 		info.addView(nameView);
 
 		
@@ -81,7 +88,9 @@ public class PopUpCardView extends LinearLayout {
 	}
 	
 	public void setAll(Card card) {
-		imageView.setImageResource(card.getImageID());
+		imageView.setImageResource(CardGame.getImageId(card.getImageID()));
 		nameView.setText(card.getName());
 	}
+	
+
 }

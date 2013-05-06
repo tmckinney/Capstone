@@ -31,6 +31,8 @@ import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Deck;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Player;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Table;
 import edu.wcu.cs.cs495.capstonecardgame.views.PopUpCardView;
+import edu.wcu.cs.cs495.capstonecardgame.views.PopUpItemCardView;
+import edu.wcu.cs.cs495.capstonecardgame.views.PopUpMonsterCardView;
 import edu.wcu.cs.cs495.capstonecardgame.database.DataBaseHelper;
 //import edu.wcu.cs.cs495.capstonecardgame.database.DatabaseInterface;
 import edu.wcu.cs.cs495.capstonecardgame.database.DatabaseInterface;
@@ -254,17 +256,19 @@ public class CardGame extends Activity {
 			
 			Log.d(DatabaseInterface.MONSTER_TABLE, "" + cur.getCount());
 			
+			int defense = 15; //cur.getInt(cur.getColumnIndex(DatabaseInterface.DEFENSE_POINTS));
+			String effect = cur.getString(cur.getColumnIndex(DatabaseInterface.EFFECT));			
 			int id= cur.getInt(cur.getColumnIndex(DatabaseInterface.M_CARD_ID));
 			String name = cur.getString(cur.getColumnIndex(DatabaseInterface.M_NAME));
 			String description = cur.getString(cur.getColumnIndex(DatabaseInterface.M_DISC));
 			String type = cur.getString(cur.getColumnIndex(DatabaseInterface.TYPE));
 			int health = cur.getInt(cur.getColumnIndex(DatabaseInterface.HP));
 			int attack = 10;// = cur.getInt(cur.getColumnIndex(DatabaseInterface.ATTACK_POINTS));
-			int defense = cur.getInt(cur.getColumnIndex(DatabaseInterface.DEFENSE_POINTS));
 			int accuracy = 100; //cur.getInt(cur.getColumnIndex(DatabaseInterface.ACCURACY));
 			float regen_rate = cur.getFloat(cur.getColumnIndex(DatabaseInterface.REGEN_RATE));
+
 			
-			MonsterCard card = new MonsterCard(id, name, description, type, health, attack, defense, accuracy, regen_rate, null);
+			MonsterCard card = new MonsterCard(id, name, description, type, health, attack, defense, accuracy, regen_rate, effect);
 			deckObject.addCard(card);
 			
 			cur.moveToNext();
@@ -283,7 +287,7 @@ public class CardGame extends Activity {
 			int id = cur.getInt(cur.getColumnIndex(DatabaseInterface.I_CARD_ID));
 			String name = cur.getString(cur.getColumnIndex(DatabaseInterface.I_NAME));
 			String description = cur.getString(cur.getColumnIndex(DatabaseInterface.I_DISCRIPTION));
-			String power = cur.getString(cur.getColumnIndex(DatabaseInterface.I_POWER));
+			String power = cur.getString(cur.getColumnIndex(DatabaseInterface.EFFECT));
 			boolean oneTimeUse = (cur.getInt(cur.getColumnIndex(DatabaseInterface.ONE_TIME_USE)) == 0 ? true : false);
 			
 			ItemCard card = new ItemCard(id, name, description, power, oneTimeUse);
@@ -360,7 +364,8 @@ public class CardGame extends Activity {
 					if (card == null) {
 						Log.e(TAG, "Card is null.");
 					}
-					else if (card.getName() == null) {
+					
+					if (card.getName() == null) {
 						Log.e(TAG, "Card name is null");
 						card.setName("Null Card");
 					}
@@ -451,7 +456,11 @@ public class CardGame extends Activity {
 			promptBuilder.setMessage("Cancel to Exit");
 		}
 		//promptBuilder.setView(View v);
-		cardView = new PopUpCardView(this);
+		if (table.getCard((Integer) handCard.getTag()) instanceof MonsterCard) {
+			cardView = new PopUpMonsterCardView(this);
+		} else {
+			cardView = new PopUpItemCardView(this);
+		}
 		cardView.setAll(table.getCard((Integer) handCard.getTag()));
 		promptBuilder.setView(cardView);
 
@@ -596,7 +605,7 @@ public class CardGame extends Activity {
 	 */
 	private void drawTable() {
 		for (int i = 0; i < NUM_OF_CARDS; i++) {
-			tableCards[i].setImageResource(table.getCard(i).getImageID());
+			tableCards[i].setImageResource(getImageId(table.getCard(i).getImageID()));
 		}
 	}
 
@@ -632,7 +641,7 @@ public class CardGame extends Activity {
 		int tag = (Integer) card.getTag();
 		if (table.getCard(tag) != NullCard.getInstance()) {
 			if (table == hand) {
-				discard.setImageResource(hand.getCard(tag).getImageID());
+				discard.setImageResource(getImageId(hand.getCard(tag).getImageID()));
 				discardObject.addCard(hand.getCard(tag));
 				removeCard(tag);
 			} else if (table == players[0].getTable()){
@@ -645,6 +654,38 @@ public class CardGame extends Activity {
 				canDraw = true;
 			}
 		}
+	}
+	
+	public static int getImageId(int id) {
+		int imageID;
+		switch (id) {
+		case 1:
+			imageID = R.drawable.zn;
+			break;
+		case 2:
+			imageID = R.drawable.fs;
+			break;
+		case 3:
+			imageID = R.drawable.is;
+			break;
+		case 4:
+			imageID = R.drawable.ytsorf;
+			break;
+		case 101:
+		case 103:
+			imageID = R.drawable.hp;
+			break;
+		case 102:
+			imageID = R.drawable.mp;
+			break;
+		case 104:
+			imageID = R.drawable.bitter_bomb;
+			break;
+		default:
+			imageID = -999999999;
+			break;
+		}
+		return imageID;
 	}
 
 	/**

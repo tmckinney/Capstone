@@ -1,6 +1,7 @@
 package edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards;
 
 import java.util.Locale;
+import java.util.Random;
 
 public abstract class MonsterGameCard implements Card {
 	
@@ -50,6 +51,8 @@ public abstract class MonsterGameCard implements Card {
 	/** The card's description. */
 	private String description;
 	
+	private Random random;
+	
 	protected int effect;
 	protected int turns;
 	protected int damage;
@@ -60,6 +63,8 @@ public abstract class MonsterGameCard implements Card {
 		this.imageID = imageID;
 		this.name = name;
 		this.description = description;
+		
+		this.random = new Random();
 	}
 	
 	public String[] parseEffect(String string) {
@@ -202,7 +207,21 @@ public abstract class MonsterGameCard implements Card {
 	
 	public abstract int effect1(MonsterGameCard target);
 	
-	public abstract int effect2(MonsterGameCard target);
+	public int effect(MonsterGameCard target) {
+		
+		boolean hit = false;
+		int hits = random.nextInt(100);
+		
+		if (hits <= chance) {
+			hit = true;
+		}
+		
+		if (hit)
+				((MonsterCard) target).affect(effect, turns + 1, damage, ON);
+		
+		return hits;
+
+	}
 	
 	public abstract int effect3(MonsterGameCard target);
 

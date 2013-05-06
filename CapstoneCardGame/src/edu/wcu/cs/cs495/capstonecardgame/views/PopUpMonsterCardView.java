@@ -47,6 +47,7 @@ public class PopUpMonsterCardView extends PopUpCardView {
 		info.addView(effect);
 		info.addView(descriptionHeader);
 		info.addView(description);
+		
 	}
 	
 	public void setAll(Card card) {

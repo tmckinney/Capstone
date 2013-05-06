@@ -1,9 +1,5 @@
 package edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards;
 
-import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.MonsterGameCard;
-
-import java.util.Locale;
-
 public class ItemCard extends MonsterGameCard {
 	
 	private static final int NOW            = 0;
@@ -11,10 +7,10 @@ public class ItemCard extends MonsterGameCard {
 	private static final int AFTER_T_TURNS  = 2;
 	private static final String BEFORE_STRING = "before";
 
-	private static boolean BEFORE = true;
-	private static boolean AFTER  = false;
+//	private static boolean BEFORE = true;
+//	private static boolean AFTER  = false;
 	
-	private String power;
+//	private String power;
 	
 	private int time;
     private int numTurns;
@@ -25,7 +21,7 @@ public class ItemCard extends MonsterGameCard {
 
 	public ItemCard(int imageID, String name, String description, String power, Boolean oneTimeUse) {
 		super(imageID, name, description);
-		this.power = power;
+//		this.power = power;
 		this.oneTimeUse = oneTimeUse;
 		this.used = false;
 		
@@ -35,13 +31,13 @@ public class ItemCard extends MonsterGameCard {
 	
 
 	@Override
-	public int effect1(MonsterGameCard target) {
-		used = true;
+	public int effect(MonsterGameCard target) {
+				used = true;
 		return 0;
 	}
 
 	@Override
-	public int effect2(MonsterGameCard target) {
+	public int effect1(MonsterGameCard target) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

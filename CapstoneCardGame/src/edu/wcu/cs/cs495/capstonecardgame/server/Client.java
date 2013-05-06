@@ -18,16 +18,16 @@ class Client {
 	private final static String DEFAULT_PORT = "8888";
 
 	/** Default value to use if the user did not provide a user name. <CRLF>. */
-	private final static String DEFAULT_STRING = "\r\n"; // Carriage Return.
+//	private final static String DEFAULT_STRING = "\r\n"; // Carriage Return.
 															// Line Feed.
 
 	/** A String called when there is a connection error. */
-	private final static String ERROR_MSG = "Error occured while "
-			+ "creating socket to port: ";
+//	private final static String ERROR_MSG = "Error occured while "
+//			+ "creating socket to port: ";
 
 	/** A string that is an error message for incorrect command line args. */
-	private final static String USAGE_ERROR = "Usage: FingerTCP "
-			+ "<hostname> [<port>] [<user>]";
+//	private final static String USAGE_ERROR = "Usage: FingerTCP "
+//			+ "<hostname> [<port>] [<user>]";
 
 	/** The int entered by the user to specify the port to connect to. */
 	private int port;
@@ -36,7 +36,7 @@ class Client {
 	private Socket clientSocket; // Socket with a server
 
 	/** A String entered by user as command line argument as the host. */
-	private String host;
+//	private String host;
 
 	/** The String entered by the user to indicate the item to search for. */
 	private String user;
@@ -60,7 +60,7 @@ class Client {
 			SecurityException, NumberFormatException {
 		this.user = command;
 		this.port = checkForInt(DEFAULT_PORT);
-		this.host = host;
+//		this.host = host;
 		clientSocket = new Socket(host, this.port);
 	}
 

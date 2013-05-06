@@ -1,7 +1,5 @@
 package edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards;
 
-import java.util.Random;
-
 public class MonsterCard extends MonsterGameCard {
 
 	private static final String  TAG           = "Monster Card";
@@ -14,15 +12,14 @@ public class MonsterCard extends MonsterGameCard {
 	private final int MAX_DEFENSE;
 	private final int MAX_HEALTH;
 	private final int MAX_ATTACK;
-	private final double MAX_ACCURACY;
+//	private final double MAX_ACCURACY;
 	private boolean[] statuses;
 	private boolean imm;
 	private int[] statusTime;
 	
-	private Random random;
 	private int[] statusDamage;	
 	
-	public MonsterCard(int imageID, String name, String description, String type, int health, int attack, int defense, double accuracy, float regen_rate, String effect1) {
+	public MonsterCard(int imageID, String name, String description, String type, int health, int attack, int defense, double accuracy, float regen_rate, String effect) {
 		super(imageID, name, description);
 		this.health       = health;
 		this.MAX_HEALTH   = health;
@@ -36,11 +33,9 @@ public class MonsterCard extends MonsterGameCard {
 		this.statusDamage = new int[NUM_STATUS];
 		this.imm          = false;
 		this.accuracy     = accuracy;
-		this.MAX_ACCURACY = accuracy;
+//		this.MAX_ACCURACY = accuracy;
 		
-		this.random       = new Random();
-		
-		parseEffect(effect1);
+		parseEffect(effect);
 	}
 
 	public int effect1(MonsterGameCard target) {
@@ -49,23 +44,6 @@ public class MonsterCard extends MonsterGameCard {
 		} else {
 			return target.getStat(HEALTH);
 		}
-	}
-
-	@Override
-	public int effect2(MonsterGameCard target) {
-		
-		boolean hit = false;
-		int hits = random.nextInt(100);
-		
-		if (hits <= chance) {
-			hit = true;
-		}
-		
-		if (hit)
-				((MonsterCard) target).affect(effect, turns + 1, damage, ON);
-		
-		return hits;
-
 	}
 
 	@Override
@@ -147,7 +125,7 @@ public class MonsterCard extends MonsterGameCard {
 	}
 	
 
-	private void affect(int status, int turns, int damage, boolean toggle) {
+	public void affect(int status, int turns, int damage, boolean toggle) {
 		statuses[status]     = toggle;
 		statusTime[status]   = turns;
 		statusDamage[status] = damage;

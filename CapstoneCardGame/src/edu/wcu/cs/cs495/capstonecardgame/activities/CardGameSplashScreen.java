@@ -7,7 +7,6 @@ import edu.wcu.cs.cs495.capstonecardgame.database.DatabaseInterface;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 
 public class CardGameSplashScreen extends Activity implements DatabaseInterface {

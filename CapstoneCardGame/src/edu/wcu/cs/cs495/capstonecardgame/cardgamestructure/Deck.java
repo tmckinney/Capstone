@@ -4,11 +4,8 @@ import java.util.Date;
 import java.util.Random;
 
 import android.util.Log;
-import edu.wcu.cs.cs495.capstonecardgame.R;
 import edu.wcu.cs.cs495.capstonecardgame.activities.CardGame;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
-import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.ItemCard;
-import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.MonsterCard;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.NullCard;
 
 
