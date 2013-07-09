@@ -146,6 +146,8 @@ public class CardGame extends Activity {
 	/** A custom view showing a card and all of it's information. */
 	private PopUpCardView cardView;
 
+	private boolean canUse;
+
 	/** 
 	 * Specifies the behavior of the <code>Activity</code> as soon as it is
 	 * created.
@@ -164,6 +166,8 @@ public class CardGame extends Activity {
 
 		playerRadios =
 				(RadioGroup) findViewById(R.id.player_radios);
+		
+		canUse = true;
 
 		ViewTreeObserver tableObserver = tableLayout.getViewTreeObserver();
 
@@ -506,7 +510,13 @@ public class CardGame extends Activity {
 
 
 		promptBuilder.setTitle("Choose an Action");
-		if (canDiscardTable) {
+		if (canUse && canDiscardTable) {
+			if (table.getCard((Integer) tableCard.getTag()) instanceof MonsterCard) {
+				promptBuilder.setMessage("Attack, Discard, or Cancel");
+			} else if (table.getCard((Integer) tableCard.getTag()) instanceof ItemCard) {
+				promptBuilder.setMessage("Use, Discard, or Cancel");
+			}
+		} else if (canDiscardTable) {
 			promptBuilder.setMessage("Discard or Cancel.");
 		} else {
 			promptBuilder.setMessage("Cancel to Exit");
@@ -526,6 +536,7 @@ public class CardGame extends Activity {
 		});
 		
 		if (canDiscardTable) {
+			if (table.getCard((Integer) tableCard.getTag()) instanceof MonsterCard);
 			promptBuilder.setNeutralButton("Discard", new DialogInterface.OnClickListener() {
 
 				@Override
@@ -534,10 +545,32 @@ public class CardGame extends Activity {
 				}
 			});
 		}
+		
+		if (canUse) {
+			String title = "Error";
+			if (table.getCard((Integer) tableCard.getTag()) instanceof MonsterCard) {
+				title = "Attack";
+			} else if (table.getCard((Integer) tableCard.getTag()) instanceof ItemCard) {
+				title = "Use";
+			}
+			promptBuilder.setPositiveButton(title, new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					CardGame.activate(table.getCard((Integer) card.getTag()));
+				}
+
+			});
+		}
 
 		AlertDialog prompt = promptBuilder.create();
 		prompt.show();
 	}
+	protected static void activate(Card card) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	/** 
 	 * Helper method to move a card from the player's hand to the player's table. 
 	 */
