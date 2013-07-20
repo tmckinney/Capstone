@@ -28,6 +28,10 @@
         <activity
             android:name="edu.wcu.cs.cs495.capstonecardgame.activities.CardGame"
             android:label="@string/app_name" >
+        </activity> 
+        
+        <activity
+            android:name="edu.wcu.cs.cs495.capstonecardgame.activities.CardGameMenu" >
         </activity>
     </application>
 

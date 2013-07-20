@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.widget.Button;
+import android.widget.DialerFilter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -144,9 +146,23 @@ public class CardGame extends Activity {
 	private Player[] players;
 	
 	/** A custom view showing a card and all of it's information. */
-	private PopUpCardView cardView;
+	private View cardView;
 
 	private boolean canUse;
+
+	private int playerID;
+
+	private int turn;
+	
+	private long seed;
+
+	private Button health;
+
+	private boolean selectingTarget;
+
+	protected boolean cardSelected;
+
+	private Card activatedCard;
 
 	/** 
 	 * Specifies the behavior of the <code>Activity</code> as soon as it is
@@ -159,7 +175,7 @@ public class CardGame extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.layout_landscape);
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		//setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
 		tableLayout =
 				(LinearLayout) findViewById(R.id.table);
@@ -264,6 +280,7 @@ public class CardGame extends Activity {
 			String effect = cur.getString(cur.getColumnIndex(DatabaseInterface.EFFECT));			
 			int id= cur.getInt(cur.getColumnIndex(DatabaseInterface.M_CARD_ID));
 			String name = cur.getString(cur.getColumnIndex(DatabaseInterface.M_NAME));
+			Log.e(TAG, "Building " + name);
 			String description = cur.getString(cur.getColumnIndex(DatabaseInterface.M_DISC));
 			String type = cur.getString(cur.getColumnIndex(DatabaseInterface.TYPE));
 			int health = cur.getInt(cur.getColumnIndex(DatabaseInterface.HP));
@@ -276,6 +293,8 @@ public class CardGame extends Activity {
 			deckObject.addCard(card);
 			
 			cur.moveToNext();
+			
+			Log.d(TAG, "Deck Size : " + deckObject.getSize());
 		}
 		
 		cur = db.query(DatabaseInterface.ITEM_TRAP_TABLE, null, null, null, null, null, null);
@@ -309,7 +328,8 @@ public class CardGame extends Activity {
 		discard = (ImageView) findViewById(R.id.discard);
 		deck.setImageResource(R.drawable.ic_launcher);
 		discard.setImageResource(R.drawable.nc);
-		
+		health = (Button) findViewById(R.id.menu_1);
+
 
 		this.handIndex       = 0;
 		this.numOfPlayers    = 4; // TODO:Remove after testing;
@@ -321,6 +341,7 @@ public class CardGame extends Activity {
 		this.discardObject   = new Deck(NUM_OF_CARDS, false);
 		this.hand            = new Table();
 		this.table           = hand;
+		this.selectingTarget = false;
 		
 		players[0] = new Player("Tyler");
 		players[1] = new Player("Tamara");
@@ -328,7 +349,7 @@ public class CardGame extends Activity {
 		players[3] = new Player("Michael");
 
 		readDeck();
-		deckObject.shuffleDeck();
+		deckObject.shuffleDeck(seed);
 		
 		normalListener = new OnClickListener() {
 
@@ -338,6 +359,8 @@ public class CardGame extends Activity {
 				cardClicked((ImageView) tableCard);
 			}
 		};
+		
+		health.setText("" + players[0].getHealth());
 	}
 
 	/** Helper method to set <code>OnClickListener</code>s to each GUI element. */
@@ -367,12 +390,8 @@ public class CardGame extends Activity {
 					}
 					if (card == null) {
 						Log.e(TAG, "Card is null.");
-					}
-					
-					if (card.getName() == null) {
-						Log.e(TAG, "Card name is null");
-						card.setName("Null Card");
-					}
+						card = NullCard.getInstance();
+					} 
 					
 					Log.d(TAG, "Drew a " + card.getName());
 					hand.setCard(handIndex, card);
@@ -414,6 +433,8 @@ public class CardGame extends Activity {
 				currentPlayer = tag;
 				table = players[tag].getTable();
 				drawTable();
+				
+				health.setText("" + players[tag].getHealth());
 			}
 		});
 	}
@@ -436,7 +457,9 @@ public class CardGame extends Activity {
 	 */
 	private void cardClicked(ImageView card) {
 		if (table.getCard((Integer) card.getTag()) != NullCard.getInstance()) {
-			if (table == hand) {
+			if (selectingTarget) {
+				getTargetCard(card);
+			} else if (table == hand) {
 				clickedHandCard(card);
 			} else if (table == players[0].getTable()){
 				clickedTableCard(card);
@@ -465,7 +488,7 @@ public class CardGame extends Activity {
 		} else {
 			cardView = new PopUpItemCardView(this);
 		}
-		cardView.setAll(table.getCard((Integer) handCard.getTag()));
+		((PopUpCardView) cardView).setAll(table.getCard((Integer) handCard.getTag()));
 		promptBuilder.setView(cardView);
 
 		promptBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -523,7 +546,7 @@ public class CardGame extends Activity {
 		}
 		//promptBuilder.setView(View v);
 		cardView = new PopUpCardView(this);
-		cardView.setAll(table.getCard((Integer) tableCard.getTag()));
+		((PopUpCardView) cardView).setAll(table.getCard((Integer) tableCard.getTag()));
 		promptBuilder.setView(cardView);
 
 		promptBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -557,7 +580,7 @@ public class CardGame extends Activity {
 
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					CardGame.activate(table.getCard((Integer) card.getTag()));
+					activate(table.getCard((Integer) card.getTag()));
 				}
 
 			});
@@ -566,9 +589,72 @@ public class CardGame extends Activity {
 		AlertDialog prompt = promptBuilder.create();
 		prompt.show();
 	}
-	protected static void activate(Card card) {
-		// TODO Auto-generated method stub
+	
+	protected void activate(Card card) {
+		selectingTarget = true;
+		activatedCard   = card;
+	}
+
+	private Card getTargetCard(View tableCard) {
 		
+		//final View card = tableCard;
+		cardSelected = false;
+
+		AlertDialog.Builder promptBuilder = new AlertDialog.Builder(this);
+		
+		String action = "";
+		
+		Card card = table.getCard((Integer) tableCard.getTag());
+		if ( card instanceof MonsterCard) {
+			action = "Confirm This Attack?";
+		} else {
+			action = "Use This Item?";
+		}
+
+
+		promptBuilder.setTitle("Conformation");
+	
+		//promptBuilder.setView(View v);
+		cardView = (View) new BattleView(this);
+		((BattleView) cardView).setAll(activatedCard, table.getCard((Integer) tableCard.getTag()));
+		promptBuilder.setView(cardView);
+
+		
+		promptBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				cardSelected    = true;
+				selectingTarget = false;
+			}
+		});
+		
+		promptBuilder.setNeutralButton("No", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				dialog.cancel();
+			}
+		});
+		
+		promptBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				selectingTarget = false;
+				dialog.cancel();
+			}
+
+		});
+		
+		AlertDialog prompt = promptBuilder.create();
+		prompt.show();
+		
+		if (cardSelected) 
+			return card;
+		
+		return null;
 	}
 
 	/** 
@@ -821,5 +907,33 @@ public class CardGame extends Activity {
 	 */
 	public void setCanDiscardTable(boolean canDiscardTable) {
 		this.canDiscardTable = canDiscardTable;
+	}
+	
+	public void setTurn(int turn) {
+		this.turn = turn;
+	}
+	
+	public void setPlayerID(int playerID) {
+		this.playerID = playerID;
+	}
+	
+	public void nextTurn() {
+		turn = (turn + 1) % numOfPlayers;
+		if (turn == playerID)
+			canPlay = canUse = canDraw = canDiscardHand = canDiscardTable = true;
+	}
+
+	/**
+	 * @return the seed
+	 */
+	public long getSeed() {
+		return seed;
+	}
+
+	/**
+	 * @param seed the seed to set
+	 */
+	public void setSeed(long seed) {
+		this.seed = seed;
 	}
 }

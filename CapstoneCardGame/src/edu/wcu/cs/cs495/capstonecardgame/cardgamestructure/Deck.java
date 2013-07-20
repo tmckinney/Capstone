@@ -82,9 +82,9 @@ public class Deck {
 	}
 
     /** Shuffles the deck using a Fisher-Yates shuffling algorithm. */
-	public void shuffleDeck() {
+	public void shuffleDeck(long seed) {
 		Date date = new Date();
-		Random random = new Random(date.getTime());
+		Random random = new Random(seed);
 		int j;
 		for (int i = cards.length - 1; i >= 1; i--) {
 			j = random.nextInt(i);
@@ -92,5 +92,9 @@ public class Deck {
 			cards[i] = cards[j];
 			cards[j] = temp;
 		}
+	}
+	
+	public int getSize() {
+		return top;
 	}
 }

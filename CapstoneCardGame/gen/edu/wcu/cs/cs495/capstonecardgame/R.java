@@ -26,51 +26,68 @@ public final class R {
         public static final int zn=0x7f02000c;
     }
     public static final class id {
-        public static final int deck=0x7f07000e;
-        public static final int discard=0x7f07000f;
-        public static final int left_layout=0x7f070000;
-        public static final int menu_1=0x7f07000a;
-        public static final int menu_2=0x7f07000b;
-        public static final int menu_3=0x7f07000c;
-        public static final int menu_4=0x7f07000d;
-        public static final int menu_settings=0x7f070014;
-        public static final int player_1_radio=0x7f070002;
-        public static final int player_2_radio=0x7f070003;
-        public static final int player_3_radio=0x7f070004;
-        public static final int player_4_radio=0x7f070005;
-        public static final int player_radios=0x7f070001;
-        public static final int popupdescription=0x7f070013;
-        public static final int popupimage=0x7f070011;
-        public static final int popupname=0x7f070012;
-        public static final int popupviewlayout=0x7f070010;
-        public static final int right_layout=0x7f070009;
-        public static final int row1=0x7f070007;
-        public static final int row2=0x7f070008;
-        public static final int table=0x7f070006;
+        public static final int button1=0x7f070000;
+        public static final int button2=0x7f070001;
+        public static final int button3=0x7f070002;
+        public static final int button4=0x7f070003;
+        public static final int deck=0x7f07000b;
+        public static final int discard=0x7f07000c;
+        public static final int left_layout=0x7f070004;
+        public static final int menu_1=0x7f07000e;
+        public static final int menu_2=0x7f07000f;
+        public static final int menu_3=0x7f070010;
+        public static final int menu_4=0x7f070011;
+        public static final int menu_settings=0x7f07001c;
+        public static final int player_1_radio=0x7f070006;
+        public static final int player_1_radio_1=0x7f070007;
+        public static final int player_2_radio=0x7f070015;
+        public static final int player_2_radio_2=0x7f070008;
+        public static final int player_3_radio=0x7f070016;
+        public static final int player_3_radio_3=0x7f070009;
+        public static final int player_4_radio=0x7f070017;
+        public static final int player_4_radio_4=0x7f07000a;
+        public static final int player_radios=0x7f070005;
+        public static final int popupdescription=0x7f07001b;
+        public static final int popupimage=0x7f070019;
+        public static final int popupname=0x7f07001a;
+        public static final int popupviewlayout=0x7f070018;
+        public static final int right_layout=0x7f07000d;
+        public static final int row1=0x7f070013;
+        public static final int row2=0x7f070014;
+        public static final int table=0x7f070012;
     }
     public static final class layout {
         public static final int activity_card_game=0x7f030000;
-        public static final int layout_landscape=0x7f030001;
-        public static final int popupcardview=0x7f030002;
-        public static final int splash_screen_layout=0x7f030003;
+        public static final int cardgamemenu=0x7f030001;
+        public static final int layout_landscape=0x7f030002;
+        public static final int popupcardview=0x7f030003;
+        public static final int splash_screen_layout=0x7f030004;
     }
     public static final class menu {
         public static final int activity_card_game=0x7f060000;
     }
     public static final class string {
         public static final int app_name=0x7f040000;
-        public static final int card=0x7f04000b;
+        public static final int card=0x7f04000f;
         public static final int hello_world=0x7f040001;
-        public static final int menu_1=0x7f040007;
-        public static final int menu_2=0x7f040008;
-        public static final int menu_3=0x7f040009;
-        public static final int menu_4=0x7f04000a;
+        public static final int joingamebutton=0x7f040012;
+        public static final int menu_1=0x7f04000b;
+        public static final int menu_2=0x7f04000c;
+        public static final int menu_3=0x7f04000d;
+        public static final int menu_4=0x7f04000e;
         public static final int menu_settings=0x7f040002;
+        public static final int newgamebutton=0x7f040011;
         public static final int player_1=0x7f040003;
+        public static final int player_1_1=0x7f040007;
         public static final int player_2=0x7f040004;
+        public static final int player_2_2=0x7f040008;
         public static final int player_3=0x7f040005;
+        public static final int player_3_3=0x7f040009;
         public static final int player_4=0x7f040006;
-        public static final int popupimage=0x7f04000c;
+        public static final int player_4_4=0x7f04000a;
+        public static final int popupimage=0x7f040010;
+        public static final int settingsbutton=0x7f040014;
+        public static final int viewcardsbutton=0x7f040013;
     }
     public static final class style {
         /** 

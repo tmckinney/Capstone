@@ -30,7 +30,14 @@ public class CardGameSplashScreen extends Activity implements DatabaseInterface 
 	        
 	        myDbHelper.close();
 			
-			Intent i = new Intent(this, CardGame.class);
+	        try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	        
+			Intent i = new Intent(this, CardGameMenu.class);
 			startActivity(i);
 			
 			this.onStop();    	

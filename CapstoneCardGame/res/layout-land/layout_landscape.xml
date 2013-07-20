@@ -57,6 +57,7 @@
             android:orientation="vertical" >
             
             <LinearLayout
+                android:orientation="horizontal"
                 android:id="@+id/row1"
             	android:layout_width="wrap_content"
             	android:layout_height="wrap_content" >
@@ -64,6 +65,7 @@
             </LinearLayout>
             
             <LinearLayout
+                android:orientation="horizontal"
                 android:id="@+id/row2"
             	android:layout_width="wrap_content"
             	android:layout_height="wrap_content" >
@@ -86,8 +88,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:typeface="serif" 
-            android:textStyle="italic"
-            android:onClick="attack"/>
+            android:textStyle="italic"/>
 
         <Button
             android:id="@+id/menu_2"

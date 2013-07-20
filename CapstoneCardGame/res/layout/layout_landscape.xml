@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
@@ -17,33 +18,33 @@
             android:orientation="horizontal" >
 
             <RadioButton
-                android:id="@+id/player_1_radio"
+                android:id="@+id/player_1_radio_1"
                 android:tag="0"
-                android:text="@string/player_1"
+                android:text="@string/player_1_1"
                 android:typeface="serif" 
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
             <RadioButton
-                android:id="@+id/player_2_radio"
+                android:id="@+id/player_2_radio_2"
                 android:tag="1"
-                android:text="@string/player_2"
+                android:text="@string/player_2_2"
                 android:typeface="serif"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
             <RadioButton
-                android:id="@+id/player_3_radio"
+                android:id="@+id/player_3_radio_3"
                 android:tag="2"
-                android:text="@string/player_3"
+                android:text="@string/player_3_3"
                 android:typeface="serif"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
             <RadioButton
-                android:id="@+id/player_4_radio"
+                android:id="@+id/player_4_radio_4"
                 android:tag="3"
-                android:text="@string/player_4"
+                android:text="@string/player_4_4"
                 android:typeface="serif"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -51,26 +52,27 @@
         </RadioGroup>
         
         <LinearLayout
-            android:id="@+id/table"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" >
+			    android:layout_width="match_parent"
+			    android:layout_height="match_parent" >
             
-            <LinearLayout
-                android:id="@+id/row1"
-            	android:layout_width="wrap_content"
-            	android:layout_height="wrap_content" >
-            	
-            </LinearLayout>
+			<ImageView
+			    android:id="@+id/deck"
+			    android:contentDescription="@string/card"
+			    android:padding="1dp"
+			    android:layout_width="match_parent"
+			    android:layout_height="match_parent"
+			    android:layout_weight="1" />
+
+			<ImageView
+			    android:id="@+id/discard"
+			    android:contentDescription="@string/card"
+			    android:padding="1dp"
+			    android:layout_width="match_parent"
+			    android:layout_height="match_parent"
+			    android:layout_weight="1" />
             
-            <LinearLayout
-                android:id="@+id/row2"
-            	android:layout_width="wrap_content"
-            	android:layout_height="wrap_content" >
-            
-            </LinearLayout>
-        
         </LinearLayout>
+
 			
     </LinearLayout>
 
@@ -82,12 +84,11 @@
         
         <Button
             android:id="@+id/menu_1"
-            android:text="@string/menu_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:typeface="serif" 
             android:textStyle="italic"
-            android:onClick="attack"/>
+            android:enabled="false"/>
 
         <Button
             android:id="@+id/menu_2"
@@ -117,27 +118,32 @@
             android:onClick="viewTable"/>
         
         
-        <LinearLayout
-			    android:layout_width="match_parent"
-			    android:layout_height="match_parent" >
-            
-			<ImageView
-			    android:id="@+id/deck"
-			    android:contentDescription="@string/card"
-			    android:padding="1dp"
-			    android:layout_width="match_parent"
-			    android:layout_height="match_parent"
-			    android:layout_weight="1" />
 
-			<ImageView
-			    android:id="@+id/discard"
-			    android:contentDescription="@string/card"
-			    android:padding="1dp"
-			    android:layout_width="match_parent"
-			    android:layout_height="match_parent"
-			    android:layout_weight="1" />
-            
-        </LinearLayout>
     </LinearLayout>
+    
+            
+        <LinearLayout
+            android:id="@+id/table"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+            
+            <LinearLayout
+                android:orientation="horizontal"
+                android:id="@+id/row1"
+            	android:layout_width="wrap_content"
+            	android:layout_height="wrap_content" >
+            	
+            </LinearLayout>
+            
+            <LinearLayout
+                android:orientation="horizontal"
+                android:id="@+id/row2"
+            	android:layout_width="wrap_content"
+            	android:layout_height="wrap_content" >
+            
+            </LinearLayout>
+        
+        </LinearLayout>
 
 </LinearLayout>
