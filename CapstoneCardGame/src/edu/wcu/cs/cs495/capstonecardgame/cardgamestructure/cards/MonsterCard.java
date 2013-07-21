@@ -1,5 +1,7 @@
 package edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards;
 
+import android.util.Log;
+
 public class MonsterCard extends MonsterGameCard {
 
 	private static final String  TAG           = "Monster Card";
@@ -58,14 +60,17 @@ public class MonsterCard extends MonsterGameCard {
 	}
 	
 	public int attack(MonsterCard card) {
+		Log.d(TAG, this.getName() + " attacking " + card.getName());
 		if (!imm)
 		return card.block(this.attack);
 		return ERROR;
 	}
 	
 	public int block(int incomingAttack) {
+
 		incomingAttack -= this.defense;
 		if (incomingAttack > 0) {
+			Log.d(TAG, this.getName() + " taking " + incomingAttack);
 			this.health -= incomingAttack;
 		}
 

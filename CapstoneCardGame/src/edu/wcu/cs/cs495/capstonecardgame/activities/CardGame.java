@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -16,7 +15,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.Button;
-import android.widget.DialerFilter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -32,6 +30,7 @@ import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.NullCard;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Deck;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Player;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Table;
+import edu.wcu.cs.cs495.capstonecardgame.views.BattleView;
 import edu.wcu.cs.cs495.capstonecardgame.views.PopUpCardView;
 import edu.wcu.cs.cs495.capstonecardgame.views.PopUpItemCardView;
 import edu.wcu.cs.cs495.capstonecardgame.views.PopUpMonsterCardView;
@@ -163,6 +162,14 @@ public class CardGame extends Activity {
 	protected boolean cardSelected;
 
 	private Card activatedCard;
+
+	private ActionHandler handler;
+
+	private AlertDialog.Builder promptBuilder;
+
+	private AlertDialog prompt;
+
+	private Card targetCard;
 
 	/** 
 	 * Specifies the behavior of the <code>Activity</code> as soon as it is
@@ -361,6 +368,8 @@ public class CardGame extends Activity {
 		};
 		
 		health.setText("" + players[0].getHealth());
+		
+		handler = ActionHandler.getInstance();
 	}
 
 	/** Helper method to set <code>OnClickListener</code>s to each GUI element. */
@@ -458,7 +467,7 @@ public class CardGame extends Activity {
 	private void cardClicked(ImageView card) {
 		if (table.getCard((Integer) card.getTag()) != NullCard.getInstance()) {
 			if (selectingTarget) {
-				getTargetCard(card);
+				targetCard = getTargetCard(card);
 			} else if (table == hand) {
 				clickedHandCard(card);
 			} else if (table == players[0].getTable()){
@@ -470,7 +479,9 @@ public class CardGame extends Activity {
 	/** Helper method displaying a choice dialog when a card in the player's hand is clicked. */
 	private void clickedHandCard(ImageView handCard) {
 		final View card = handCard;
-		AlertDialog.Builder promptBuilder = new AlertDialog.Builder(this);
+		
+		if (promptBuilder == null)
+			promptBuilder = new AlertDialog.Builder(this);
 
 		promptBuilder.setTitle("Choose an Action");
 		if (canPlay && canDiscardHand) {
@@ -521,15 +532,16 @@ public class CardGame extends Activity {
 			});
 		}
 
-		AlertDialog prompt = promptBuilder.create();
+		prompt = promptBuilder.create();
 		prompt.show();
 	}
 	
 	/** Helper method displaying a choice dialog when a card on the player's table is clicked. */
 	private void clickedTableCard(ImageView tableCard) {
 		final View card = tableCard;
-
-		AlertDialog.Builder promptBuilder = new AlertDialog.Builder(this);
+		
+		if (promptBuilder == null)
+			promptBuilder = new AlertDialog.Builder(this);
 
 
 		promptBuilder.setTitle("Choose an Action");
@@ -545,7 +557,12 @@ public class CardGame extends Activity {
 			promptBuilder.setMessage("Cancel to Exit");
 		}
 		//promptBuilder.setView(View v);
-		cardView = new PopUpCardView(this);
+
+		if (table.getCard((Integer) tableCard.getTag()) instanceof MonsterCard) {
+			cardView = new PopUpMonsterCardView(this);
+		} else {
+			cardView = new PopUpItemCardView(this);
+		}
 		((PopUpCardView) cardView).setAll(table.getCard((Integer) tableCard.getTag()));
 		promptBuilder.setView(cardView);
 
@@ -586,7 +603,7 @@ public class CardGame extends Activity {
 			});
 		}
 
-		AlertDialog prompt = promptBuilder.create();
+		prompt = promptBuilder.create();
 		prompt.show();
 	}
 	
@@ -600,11 +617,12 @@ public class CardGame extends Activity {
 		//final View card = tableCard;
 		cardSelected = false;
 
-		AlertDialog.Builder promptBuilder = new AlertDialog.Builder(this);
+		if (promptBuilder == null)
+			promptBuilder = new AlertDialog.Builder(this);
 		
 		String action = "";
 		
-		Card card = table.getCard((Integer) tableCard.getTag());
+		final Card card = table.getCard((Integer) tableCard.getTag());
 		if ( card instanceof MonsterCard) {
 			action = "Confirm This Attack?";
 		} else {
@@ -612,7 +630,7 @@ public class CardGame extends Activity {
 		}
 
 
-		promptBuilder.setTitle("Conformation");
+		promptBuilder.setTitle(action);
 	
 		//promptBuilder.setView(View v);
 		cardView = (View) new BattleView(this);
@@ -624,7 +642,7 @@ public class CardGame extends Activity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				cardSelected    = true;
+				cardSelected(card);
 				selectingTarget = false;
 			}
 		});
@@ -633,7 +651,6 @@ public class CardGame extends Activity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				// TODO Auto-generated method stub
 				dialog.cancel();
 			}
 		});
@@ -648,13 +665,18 @@ public class CardGame extends Activity {
 
 		});
 		
-		AlertDialog prompt = promptBuilder.create();
+		prompt = promptBuilder.create();
 		prompt.show();
+
+		return card;
+	}
+
+	protected void cardSelected(Card card) {
 		
-		if (cardSelected) 
-			return card;
+		handler.setup(activatedCard, targetCard);
+		handler.simulate();
+		Log.d(TAG, handler.retriveResult());
 		
-		return null;
 	}
 
 	/** 
@@ -665,7 +687,7 @@ public class CardGame extends Activity {
 		Log.d(TAG, "playing card : " + handIndex);
 		final Card handCard  = hand.getCard(handIndex);
 		table = players[0].getTable();
-		setRadio1Selected();
+		playerRadios.check(R.id.player_1_radio);
 		drawTable();
 		playingCard = true;
 		for (View view : tableCards) {
@@ -696,15 +718,6 @@ public class CardGame extends Activity {
 		}
 	}
 	
-	/** Helper method to set a <code>RadioButton</code> to selected. */
-	private void setRadio1Selected() {
-		Log.d(TAG, "ID:" + playerRadios.getCheckedRadioButtonId());
-		RadioButton rb = (RadioButton) findViewById(playerRadios.getCheckedRadioButtonId());
-		rb.setSelected(false);
-		rb = (RadioButton) findViewById(R.id.player_1_radio);
-		rb.setSelected(true);
-	}
-	
 	/** Helper method to remove a card from the hand array. */
 	private void removeCard(int tag) {
 		for (int i = tag; i < NUM_OF_CARDS - 1; i++) {
@@ -728,28 +741,6 @@ public class CardGame extends Activity {
 		}
 	}
 
-	//TODO: Remove  after testing
-	private void test() {
-		for (int i = 0; i < numOfPlayers; i++) {
-			for (int j = 0; j < NUM_OF_CARDS; j++) {
-				Card card = deckObject.drawCard();
-				if (card == NullCard.getInstance()) {
-					deck.setImageResource(R.drawable.nc);
-				}
-				players[i].getTable().setCard(j, card);
-			}
-		}
-		for (int i = 0; i < NUM_OF_CARDS; i++) {
-			Card card = deckObject.drawCard();
-			if (card == NullCard.getInstance()) {
-				deck.setImageResource(R.drawable.nc);
-			}
-			hand.setCard(i, card);
-		}
-		drawTable();
-
-	}
-
 	/**
 	 * Moves a <code>Card</code> from a the <code>Player</code>'s
 	 * <code>Table</code> or hand to the discard pile.
@@ -765,7 +756,7 @@ public class CardGame extends Activity {
 				removeCard(tag);
 			} else if (table == players[0].getTable()){
 				Table playerTable  = players[0].getTable();
-				discard.setImageResource(playerTable.getCard(tag).getImageID()); 
+				discard.setImageResource(getImageId(playerTable.getCard(tag).getImageID())); 
 				discardObject.addCard(playerTable.getCard(tag));
 				playerTable.setCard(tag, NullCard.getInstance());
 				cardsOnTable--;
@@ -801,7 +792,8 @@ public class CardGame extends Activity {
 			imageID = R.drawable.bitter_bomb;
 			break;
 		default:
-			imageID = -999999999;
+			//TODO Fix this.
+			imageID = R.drawable.nc;
 			break;
 		}
 		return imageID;
@@ -822,16 +814,6 @@ public class CardGame extends Activity {
 	}
 
 	/**
-	 * Controls the behavior of the attack button.
-	 * 
-	 * @param v The view that trigger the event.
-	 */
-	public void attack(View v) {
-		Log.d(TAG, "Attack!");
-		test();
-	}
-
-	/**
 	 * Controls the behavior of the pass button.
 	 * 
 	 * @param v The view that trigger the event.
@@ -848,6 +830,7 @@ public class CardGame extends Activity {
 	public void viewHand(View v) {
 		viewChanged();
 		Log.d(TAG, "view hand");
+		playerRadios.check(R.id.player_1_radio);
 		table = hand;
 		drawTable();
 	}

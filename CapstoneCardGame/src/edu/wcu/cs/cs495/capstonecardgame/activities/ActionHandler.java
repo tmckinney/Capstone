@@ -1,11 +1,12 @@
 package edu.wcu.cs.cs495.capstonecardgame.activities;
 
+import android.util.Log;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.MonsterCard;
-import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.NullCard;
 
 public class ActionHandler {
 	
+	private static final String TAG = null;
 	private static ActionHandler instance;
 	private Card actor;
 	private Card victim;
@@ -34,6 +35,11 @@ public class ActionHandler {
 	public void simulate() {
 		if (actor instanceof MonsterCard) {
 			if (victim instanceof MonsterCard) {
+				Log.d(TAG, actor.getName()  + "- A = " +  ((MonsterCard) actor).getAttack() + " D = " 
+						                    + ((MonsterCard) actor).getDefense() 
+						                    + " : " + victim.getName() + " A = " 
+						                    + ((MonsterCard) victim).getAttack() + " D = " 
+						                    + ((MonsterCard) victim).getDefense());
 				simualateAttack((MonsterCard) actor, (MonsterCard) victim);
 			} else {
 				
@@ -49,11 +55,11 @@ public class ActionHandler {
 	
 	public void simualateAttack(MonsterCard attacker, MonsterCard victim) {
 		int health = attacker.attack(victim);
-		result = attacker.getName() + " attacked " + victim + ".";
+		result = attacker.getName() + " attacked " + victim.getName() + ". ";
 		if (victim.getHealth() <= 0) {
 			result += victim.getName() + " has died.";
 		} else {
-			result += "Victim has " + health + " remaining.";
+			result += victim.getName() + " has " + health + " health remaining.";
 		}
 	}
 	

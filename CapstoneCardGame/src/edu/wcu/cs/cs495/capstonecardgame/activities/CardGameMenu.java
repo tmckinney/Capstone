@@ -1,8 +1,6 @@
 package edu.wcu.cs.cs495.capstonecardgame.activities;
 
 
-import java.util.Date;
-
 import edu.wcu.cs.cs495.capstonecardgame.R;
 import android.app.Activity;
 import android.content.Intent;

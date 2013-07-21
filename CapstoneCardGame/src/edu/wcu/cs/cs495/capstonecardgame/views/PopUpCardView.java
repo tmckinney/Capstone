@@ -2,7 +2,6 @@ package edu.wcu.cs.cs495.capstonecardgame.views;
 
 import edu.wcu.cs.cs495.capstonecardgame.activities.CardGame;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
-import edu.wcu.cs.cs495.capstonecardgame.R;
 import android.content.Context;
 import android.graphics.Color;
 import android.widget.ImageView;

@@ -1,6 +1,5 @@
 package edu.wcu.cs.cs495.capstonecardgame.cardgamestructure;
 
-import java.util.Date;
 import java.util.Random;
 
 import android.util.Log;
@@ -83,7 +82,6 @@ public class Deck {
 
     /** Shuffles the deck using a Fisher-Yates shuffling algorithm. */
 	public void shuffleDeck(long seed) {
-		Date date = new Date();
 		Random random = new Random(seed);
 		int j;
 		for (int i = cards.length - 1; i >= 1; i--) {
