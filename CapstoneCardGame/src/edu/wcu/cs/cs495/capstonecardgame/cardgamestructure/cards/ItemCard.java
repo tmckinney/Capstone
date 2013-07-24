@@ -1,5 +1,7 @@
 package edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards;
 
+import android.content.Context;
+
 public class ItemCard extends MonsterGameCard {
 	
 	private static final int NOW            = 0;
@@ -109,5 +111,21 @@ public class ItemCard extends MonsterGameCard {
 	public void setName(String string) {
 		// TODO Auto-generated method stub
 		
+	}
+
+
+
+	@Override
+	public boolean canBeUsed() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+
+	@Override
+	public boolean toast(Context context) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

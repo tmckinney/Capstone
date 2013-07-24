@@ -1,6 +1,7 @@
 package edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards;
 
-import edu.wcu.cs.cs495.capstonecardgame.R;
+
+import android.content.Context;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
 
 
@@ -30,7 +31,7 @@ public class NullCard implements Card {
     /** Private constructor to initiate the fields of the Singleton. */
 	private NullCard() {
 		this.name        = "Null Card";
-		this.imageID     = R.drawable.nc;
+		this.imageID     = 0;
 		this.description = "A card representing an empty space on the table.";
 	}
 	
@@ -78,5 +79,23 @@ public class NullCard implements Card {
 	public void setName(String string) {
 		name = string;
 		
+	}
+
+	@Override
+	public boolean canBeUsed() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void restoreImageID() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean toast(Context context) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

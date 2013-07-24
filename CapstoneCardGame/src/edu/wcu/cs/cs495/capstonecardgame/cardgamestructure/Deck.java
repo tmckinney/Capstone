@@ -93,6 +93,6 @@ public class Deck {
 	}
 	
 	public int getSize() {
-		return top;
+		return cards.length;
 	}
 }

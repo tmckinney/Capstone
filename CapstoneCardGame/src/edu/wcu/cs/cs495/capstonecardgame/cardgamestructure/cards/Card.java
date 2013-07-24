@@ -1,5 +1,7 @@
 package edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards;
 
+import android.content.Context;
+
 /**
  * Interface describing the basic functions of a playing card or game card.
  *
@@ -32,4 +34,10 @@ public interface Card {
 	public String getDescription();
 
 	public void setName(String string);
+
+	public boolean canBeUsed();
+	
+	public void restoreImageID();
+
+	boolean toast(Context context);
 }

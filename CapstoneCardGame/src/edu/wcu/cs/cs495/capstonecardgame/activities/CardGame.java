@@ -2,6 +2,7 @@
 package edu.wcu.cs.cs495.capstonecardgame.activities;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -27,6 +28,7 @@ import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.ItemCard;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.MonsterCard;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.NullCard;
+import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.ActionHandler;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Deck;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Player;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Table;
@@ -35,7 +37,6 @@ import edu.wcu.cs.cs495.capstonecardgame.views.PopUpCardView;
 import edu.wcu.cs.cs495.capstonecardgame.views.PopUpItemCardView;
 import edu.wcu.cs.cs495.capstonecardgame.views.PopUpMonsterCardView;
 import edu.wcu.cs.cs495.capstonecardgame.database.DataBaseHelper;
-//import edu.wcu.cs.cs495.capstonecardgame.database.DatabaseInterface;
 import edu.wcu.cs.cs495.capstonecardgame.database.DatabaseInterface;
 
 
@@ -68,6 +69,8 @@ public class CardGame extends Activity {
 	 * vertically. Essentially the number of rows of cards.
 	 */
 	private static final int CARD_HIEGHT_DIVDER = 2;
+
+	public static final long PROMPT_DELAY = 0001;
 
 	/** The number of players in the current game. */
 	private int numOfPlayers;
@@ -277,21 +280,22 @@ public class CardGame extends Activity {
 		Cursor cur = db.query(DatabaseInterface.MONSTER_TABLE, null, null, null, null, null, null);
 		cur.moveToFirst();
 		
+		Log.d(DatabaseInterface.MONSTER_TABLE, "" + cur.getCount());
+
 		deckObject = new Deck(cur.getCount(), false);
+		
 		
 		while (!cur.isAfterLast()) {
 			
-			Log.d(DatabaseInterface.MONSTER_TABLE, "" + cur.getCount());
-			
-			int defense = 15; //cur.getInt(cur.getColumnIndex(DatabaseInterface.DEFENSE_POINTS));
+			int defense = cur.getInt(cur.getColumnIndex(DatabaseInterface.DEFENSE_POINTS));
 			String effect = cur.getString(cur.getColumnIndex(DatabaseInterface.EFFECT));			
 			int id= cur.getInt(cur.getColumnIndex(DatabaseInterface.M_CARD_ID));
 			String name = cur.getString(cur.getColumnIndex(DatabaseInterface.M_NAME));
-			Log.e(TAG, "Building " + name);
+			Log.i(TAG, "Building " + name);
 			String description = cur.getString(cur.getColumnIndex(DatabaseInterface.M_DISC));
 			String type = cur.getString(cur.getColumnIndex(DatabaseInterface.TYPE));
 			int health = cur.getInt(cur.getColumnIndex(DatabaseInterface.HP));
-			int attack = 10;// = cur.getInt(cur.getColumnIndex(DatabaseInterface.ATTACK_POINTS));
+			int attack = cur.getInt(cur.getColumnIndex(DatabaseInterface.ATTACK_POINTS));
 			int accuracy = 100; //cur.getInt(cur.getColumnIndex(DatabaseInterface.ACCURACY));
 			float regen_rate = cur.getFloat(cur.getColumnIndex(DatabaseInterface.REGEN_RATE));
 
@@ -338,8 +342,8 @@ public class CardGame extends Activity {
 		health = (Button) findViewById(R.id.menu_1);
 
 
+		this.numOfPlayers    = 4;
 		this.handIndex       = 0;
-		this.numOfPlayers    = 4; // TODO:Remove after testing;
 		this.canDraw         = true;
 		this.canPlay         = true;
 		this.canDiscardHand  = true;
@@ -542,13 +546,14 @@ public class CardGame extends Activity {
 		
 		if (promptBuilder == null)
 			promptBuilder = new AlertDialog.Builder(this);
-
+		
+		Card cardCard = table.getCard((Integer) tableCard.getTag());
 
 		promptBuilder.setTitle("Choose an Action");
-		if (canUse && canDiscardTable) {
-			if (table.getCard((Integer) tableCard.getTag()) instanceof MonsterCard) {
+		if (canUse && canDiscardTable && cardCard.canBeUsed()) {
+			if (cardCard instanceof MonsterCard) {
 				promptBuilder.setMessage("Attack, Discard, or Cancel");
-			} else if (table.getCard((Integer) tableCard.getTag()) instanceof ItemCard) {
+			} else if (cardCard instanceof ItemCard) {
 				promptBuilder.setMessage("Use, Discard, or Cancel");
 			}
 		} else if (canDiscardTable) {
@@ -558,7 +563,7 @@ public class CardGame extends Activity {
 		}
 		//promptBuilder.setView(View v);
 
-		if (table.getCard((Integer) tableCard.getTag()) instanceof MonsterCard) {
+		if (cardCard instanceof MonsterCard) {
 			cardView = new PopUpMonsterCardView(this);
 		} else {
 			cardView = new PopUpItemCardView(this);
@@ -576,7 +581,7 @@ public class CardGame extends Activity {
 		});
 		
 		if (canDiscardTable) {
-			if (table.getCard((Integer) tableCard.getTag()) instanceof MonsterCard);
+			if (cardCard instanceof MonsterCard);
 			promptBuilder.setNeutralButton("Discard", new DialogInterface.OnClickListener() {
 
 				@Override
@@ -586,11 +591,11 @@ public class CardGame extends Activity {
 			});
 		}
 		
-		if (canUse) {
+		if (canUse && cardCard.canBeUsed()) {
 			String title = "Error";
-			if (table.getCard((Integer) tableCard.getTag()) instanceof MonsterCard) {
+			if (cardCard instanceof MonsterCard) {
 				title = "Attack";
-			} else if (table.getCard((Integer) tableCard.getTag()) instanceof ItemCard) {
+			} else if (cardCard instanceof ItemCard) {
 				title = "Use";
 			}
 			promptBuilder.setPositiveButton(title, new DialogInterface.OnClickListener() {
@@ -607,22 +612,36 @@ public class CardGame extends Activity {
 		prompt.show();
 	}
 	
+	/**
+	 * Allow's the player to select a target card.
+	 * @param card The attacking or activated card selected.
+	 */
 	protected void activate(Card card) {
 		selectingTarget = true;
 		activatedCard   = card;
 	}
 
+	/** 
+	 * Allows the player to confirm a selected target. 
+	 * @param tableCard The card view selected
+	 * @return The card object of the selected view.
+	 */
 	private Card getTargetCard(View tableCard) {
 		
 		//final View card = tableCard;
 		cardSelected = false;
+		final Card card = table.getCard((Integer) tableCard.getTag());
+		
+		if (!card.canBeUsed()) {
+			card.toast(this);
+			return card;
+		}
 
 		if (promptBuilder == null)
 			promptBuilder = new AlertDialog.Builder(this);
 		
 		String action = "";
 		
-		final Card card = table.getCard((Integer) tableCard.getTag());
 		if ( card instanceof MonsterCard) {
 			action = "Confirm This Attack?";
 		} else {
@@ -671,11 +690,47 @@ public class CardGame extends Activity {
 		return card;
 	}
 
+	/**
+	 * Initiates a battle once a target has been selected.
+	 * @param card The target card.
+	 */
 	protected void cardSelected(Card card) {
 		
-		handler.setup(activatedCard, targetCard);
-		handler.simulate();
-		Log.d(TAG, handler.retriveResult());
+		if (card.canBeUsed()) {
+			card.toast(this);
+			handler.setup(activatedCard, targetCard);
+			handler.simulate();
+			showResult();
+		}
+		
+	}
+
+	/**
+	 * Shows the result of a battle.
+	 */
+	private void showResult() {
+		
+		promptBuilder = new AlertDialog.Builder(this);
+		
+		promptBuilder.setTitle("Aftermath");
+		
+		cardView = (View) new BattleView(this);
+		((BattleView) cardView).setAll(activatedCard, targetCard);
+		promptBuilder.setView(cardView);
+		
+		prompt = promptBuilder.create();
+		prompt.show();
+		
+		Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				prompt.dismiss();
+				
+			}
+		}, PROMPT_DELAY);
+		
+		drawTable();
 		
 	}
 
@@ -749,6 +804,9 @@ public class CardGame extends Activity {
 	 */
 	public void discard(ImageView card) {
 		int tag = (Integer) card.getTag();
+		Card tableCard = table.getCard(tag);
+		tableCard.restoreImageID();
+		
 		if (table.getCard(tag) != NullCard.getInstance()) {
 			if (table == hand) {
 				discard.setImageResource(getImageId(hand.getCard(tag).getImageID()));
@@ -766,9 +824,20 @@ public class CardGame extends Activity {
 		}
 	}
 	
+	/**
+	 * Returns the drawable id associated with the id given.
+	 * @param id The ID of the card 
+	 * @return The drawable id of the Card.
+	 */
 	public static int getImageId(int id) {
 		int imageID;
 		switch (id) {
+		case -1:
+			imageID = R.drawable.dead;
+			break;
+		case 0:
+			imageID = R.drawable.nc;
+			break;
 		case 1:
 			imageID = R.drawable.zn;
 			break;
@@ -781,6 +850,9 @@ public class CardGame extends Activity {
 		case 4:
 			imageID = R.drawable.ytsorf;
 			break;
+		case 5:
+			imageID = R.drawable.gp;
+			break;
 		case 101:
 		case 103:
 			imageID = R.drawable.hp;
@@ -792,8 +864,8 @@ public class CardGame extends Activity {
 			imageID = R.drawable.bitter_bomb;
 			break;
 		default:
-			//TODO Fix this.
-			imageID = R.drawable.nc;
+			Log.e(TAG, "Image ID is " + id);
+			imageID = R.drawable.error;
 			break;
 		}
 		return imageID;
@@ -892,14 +964,25 @@ public class CardGame extends Activity {
 		this.canDiscardTable = canDiscardTable;
 	}
 	
+	/**
+	 * Set's the current turn.
+	 * @param turn The turn to set.
+	 */
 	public void setTurn(int turn) {
 		this.turn = turn;
 	}
 	
+	/**
+	 * Sets this <code>CardGame</code>s player ID.
+	 * @param playerID The new player ID
+	 */
 	public void setPlayerID(int playerID) {
 		this.playerID = playerID;
 	}
 	
+	/**
+	 * Advances the game to the next turn.
+	 */
 	public void nextTurn() {
 		turn = (turn + 1) % numOfPlayers;
 		if (turn == playerID)
@@ -907,6 +990,7 @@ public class CardGame extends Activity {
 	}
 
 	/**
+	 * Returns the seed used for deck randomization.
 	 * @return the seed
 	 */
 	public long getSeed() {
@@ -914,6 +998,7 @@ public class CardGame extends Activity {
 	}
 
 	/**
+	 * Sets the seed for deck randomization.
 	 * @param seed the seed to set
 	 */
 	public void setSeed(long seed) {
