@@ -27,6 +27,8 @@ public class Deck {
 	private int top;
 
 	private boolean isFull;
+
+	private boolean isEmpty;
     
     /**
      * Constructor to initiate the values of the <code>Deck</code>, possibly
@@ -64,6 +66,11 @@ public class Deck {
 			card = cards[top];
 			top--;
 			Log.d(TAG, "Cards remaining: " + (top + 1));
+		} else if (top == 0) {
+			isEmpty = true;
+			card = cards[top];
+			top--;
+			Log.d(TAG, "Out of Cards");
 		} else {
 			card = NullCard.getInstance();
 			Log.d(TAG, "Out of Cards");
@@ -72,12 +79,16 @@ public class Deck {
 	}
 	
 	public void addCard(Card card) {
+		isEmpty = false;
 		if (!isFull) {
 			cards[top] = card;
 			top++;
+			Log.d(TAG, "Adding card " + card.getName() + ", cards in deck " + top);
 		}
-		if (top == cards.length - 1)
+		if (top == cards.length) {
+			top--;
 			isFull = true;
+		}
 	}
 
     /** Shuffles the deck using a Fisher-Yates shuffling algorithm. */
@@ -94,5 +105,19 @@ public class Deck {
 	
 	public int getSize() {
 		return cards.length;
+	}
+
+	/**
+	 * @return the isEmpty
+	 */
+	public boolean isEmpty() {
+		return isEmpty;
+	}
+
+	/**
+	 * @param isEmpty the isEmpty to set
+	 */
+	public void setEmpty(boolean isEmpty) {
+		this.isEmpty = isEmpty;
 	}
 }

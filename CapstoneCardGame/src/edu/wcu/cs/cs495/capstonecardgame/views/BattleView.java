@@ -4,6 +4,7 @@ import edu.wcu.cs.cs495.capstonecardgame.activities.CardGame;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
 import android.content.Context;
 import android.graphics.Color;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -11,17 +12,18 @@ import android.widget.TextView;
 
 public class BattleView extends LinearLayout {
 
-	private LinearLayout cards;
-	protected LinearLayout leftCard;
-	protected LinearLayout rightCard;
-	private ImageView    leftImage;
-	private ImageView    rightImage;
-	private ScrollView   scroller;
-	private TextView leftName;
-	private TextView rightName;
-	protected TextView leftDescription;
-	protected TextView rightDescription;
-	private Context context;
+	private   LinearLayout         cards;
+	protected LinearLayout         leftCard;
+	protected LinearLayout         rightCard;
+	private   ImageView            leftImage;
+	private   ImageView            rightImage;
+	private   ScrollView           scroller;
+	private   HorizontalScrollView hscroller;
+	private   TextView             leftName;
+	private   TextView             rightName;
+	protected TextView             leftDescription;
+	protected TextView             rightDescription;
+	private   Context              context;
 	
 	public BattleView(Context context) {
 		super(context);
@@ -29,7 +31,8 @@ public class BattleView extends LinearLayout {
 		
 		this.context = context;
 		
-		scroller = new ScrollView(context);
+		hscroller = new HorizontalScrollView(context);
+		scroller  = new ScrollView(context);
 		
 		cards = new LinearLayout(context);
 		leftCard = new LinearLayout(context);
@@ -63,6 +66,7 @@ public class BattleView extends LinearLayout {
 		cards.addView(rightCard);
 		
 		scroller.addView(cards);
+		hscroller.addView(scroller);
 		
 		this.addView(scroller);
 		
@@ -77,8 +81,8 @@ public class BattleView extends LinearLayout {
 		leftCard.addView(leftDescription);
 		rightCard.addView(rightDescription);
 		
-		leftImage.setImageResource(CardGame.getImageId(actor.getImageID()));
-		rightImage.setImageResource(CardGame.getImageId(target.getImageID()));
+		leftImage.setImageResource(CardGame.getImageId(actor.getImageID(), actor.getName()));
+		rightImage.setImageResource(CardGame.getImageId(target.getImageID(), actor.getName()));
 		
 		leftName.setText(actor.getName());
 		rightName.setText(target.getName());

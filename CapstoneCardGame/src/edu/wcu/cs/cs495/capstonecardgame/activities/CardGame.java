@@ -277,12 +277,18 @@ public class CardGame extends Activity {
 
         }
         
-		Cursor cur = db.query(DatabaseInterface.MONSTER_TABLE, null, null, null, null, null, null);
+        Cursor cur = db.query(DatabaseInterface.ITEM_TRAP_TABLE, null, null, null, null, null, null);
 		cur.moveToFirst();
+		int totalCards = cur.getCount();
+		Log.d(TAG, "Total cards = " + totalCards);
+		cur = db.query(DatabaseInterface.MONSTER_TABLE, null, null, null, null, null, null);
+		cur.moveToFirst();
+		totalCards += cur.getCount();
+		Log.d(TAG, "Total cards = " + totalCards);
 		
 		Log.d(DatabaseInterface.MONSTER_TABLE, "" + cur.getCount());
 
-		deckObject = new Deck(cur.getCount(), false);
+		deckObject = new Deck(totalCards, false);
 		
 		
 		while (!cur.isAfterLast()) {
@@ -291,7 +297,7 @@ public class CardGame extends Activity {
 			String effect = cur.getString(cur.getColumnIndex(DatabaseInterface.EFFECT));			
 			int id= cur.getInt(cur.getColumnIndex(DatabaseInterface.M_CARD_ID));
 			String name = cur.getString(cur.getColumnIndex(DatabaseInterface.M_NAME));
-			Log.i(TAG, "Building " + name);
+			Log.i(TAG, "Building " + name + " id = " + id);
 			String description = cur.getString(cur.getColumnIndex(DatabaseInterface.M_DISC));
 			String type = cur.getString(cur.getColumnIndex(DatabaseInterface.TYPE));
 			int health = cur.getInt(cur.getColumnIndex(DatabaseInterface.HP));
@@ -320,6 +326,7 @@ public class CardGame extends Activity {
 			*/
 			int id = cur.getInt(cur.getColumnIndex(DatabaseInterface.I_CARD_ID));
 			String name = cur.getString(cur.getColumnIndex(DatabaseInterface.I_NAME));
+			Log.i(TAG, "Building " + name + " id = " + id);
 			String description = cur.getString(cur.getColumnIndex(DatabaseInterface.I_DISCRIPTION));
 			String power = cur.getString(cur.getColumnIndex(DatabaseInterface.EFFECT));
 			boolean oneTimeUse = (cur.getInt(cur.getColumnIndex(DatabaseInterface.ONE_TIME_USE)) == 0 ? true : false);
@@ -328,6 +335,7 @@ public class CardGame extends Activity {
 			deckObject.addCard(card);
 			
 			cur.moveToNext();
+			Log.d(TAG, "Deck Size : " + deckObject.getSize());
 		}
 		
 		myDbHelper.close();
@@ -395,16 +403,12 @@ public class CardGame extends Activity {
 		deck.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (canDraw) {
+				if (canDraw && !deckObject.isEmpty()) {
 					table = hand;
 					Card card = deckObject.drawCard();
-					if (card == NullCard.getInstance()) {
-						deck.setImageResource(R.drawable.nc);
-					}
 					if (card == null) {
-						Log.e(TAG, "Card is null.");
 						card = NullCard.getInstance();
-					} 
+					}
 					
 					Log.d(TAG, "Drew a " + card.getName());
 					hand.setCard(handIndex, card);
@@ -412,6 +416,9 @@ public class CardGame extends Activity {
 					drawTable();
 					if (handIndex == NUM_OF_CARDS) {
 						canDraw = false;
+					}
+					if (deckObject.isEmpty()) {
+						deck.setImageResource(R.drawable.nc);
 					}
 				}
 			}
@@ -792,7 +799,7 @@ public class CardGame extends Activity {
 	 */
 	private void drawTable() {
 		for (int i = 0; i < NUM_OF_CARDS; i++) {
-			tableCards[i].setImageResource(getImageId(table.getCard(i).getImageID()));
+			tableCards[i].setImageResource(getImageId(table.getCard(i).getImageID(), table.getCard(i).getName()));
 		}
 	}
 
@@ -809,12 +816,12 @@ public class CardGame extends Activity {
 		
 		if (table.getCard(tag) != NullCard.getInstance()) {
 			if (table == hand) {
-				discard.setImageResource(getImageId(hand.getCard(tag).getImageID()));
+				discard.setImageResource(getImageId(hand.getCard(tag).getImageID(), hand.getCard(tag).getName()));
 				discardObject.addCard(hand.getCard(tag));
 				removeCard(tag);
 			} else if (table == players[0].getTable()){
 				Table playerTable  = players[0].getTable();
-				discard.setImageResource(getImageId(playerTable.getCard(tag).getImageID())); 
+				discard.setImageResource(getImageId(playerTable.getCard(tag).getImageID(), playerTable.getCard(tag).getName())); 
 				discardObject.addCard(playerTable.getCard(tag));
 				playerTable.setCard(tag, NullCard.getInstance());
 				cardsOnTable--;
@@ -829,7 +836,7 @@ public class CardGame extends Activity {
 	 * @param id The ID of the card 
 	 * @return The drawable id of the Card.
 	 */
-	public static int getImageId(int id) {
+	public static int getImageId(int id, String name) {
 		int imageID;
 		switch (id) {
 		case -1:
@@ -864,7 +871,6 @@ public class CardGame extends Activity {
 			imageID = R.drawable.bitter_bomb;
 			break;
 		default:
-			Log.e(TAG, "Image ID is " + id);
 			imageID = R.drawable.error;
 			break;
 		}
