@@ -68,7 +68,7 @@ public class BattleView extends LinearLayout {
 		scroller.addView(cards);
 		hscroller.addView(scroller);
 		
-		this.addView(scroller);
+		this.addView(hscroller);
 		
 		this.setBackgroundColor(Color.WHITE);
 	}

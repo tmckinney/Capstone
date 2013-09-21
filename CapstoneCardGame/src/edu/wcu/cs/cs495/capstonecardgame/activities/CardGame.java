@@ -1,10 +1,15 @@
 //23456789//23456789//23456789//23456789//23456789//23456789//23456789//23456789
 package edu.wcu.cs.cs495.capstonecardgame.activities;
 
+import java.util.Date;
+import java.util.Scanner;
+import java.util.regex.Pattern;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -22,6 +27,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
+import android.widget.TextView;
 
 import edu.wcu.cs.cs495.capstonecardgame.R;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
@@ -32,6 +38,8 @@ import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.ActionHandler;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Deck;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Player;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Table;
+import edu.wcu.cs.cs495.capstonecardgame.server.CallCodes;
+import edu.wcu.cs.cs495.capstonecardgame.server.NetworkQueue;
 import edu.wcu.cs.cs495.capstonecardgame.views.BattleView;
 import edu.wcu.cs.cs495.capstonecardgame.views.PopUpCardView;
 import edu.wcu.cs.cs495.capstonecardgame.views.PopUpItemCardView;
@@ -173,6 +181,8 @@ public class CardGame extends Activity {
 	private AlertDialog prompt;
 
 	private Card targetCard;
+	
+	private NetworkQueue networkQueue;
 
 	/** 
 	 * Specifies the behavior of the <code>Activity</code> as soon as it is
@@ -207,7 +217,7 @@ public class CardGame extends Activity {
 					int cardWidth  = 
 							tableLayout.getWidth() / CARD_WIDTH_DIVDER;
 					cardParams = 
-							new LinearLayout.LayoutParams(cardWidth, cardHeight);	
+							new LinearLayout.LayoutParams(cardWidth, cardHeight, 1);	
 					addCardsToTable();
 					drawTable();
 					setClickListeners();
@@ -361,6 +371,7 @@ public class CardGame extends Activity {
 		this.hand            = new Table();
 		this.table           = hand;
 		this.selectingTarget = false;
+		this.networkQueue    = new NetworkQueue();
 		
 		players[0] = new Player("Tyler");
 		players[1] = new Player("Tamara");
@@ -368,7 +379,12 @@ public class CardGame extends Activity {
 		players[3] = new Player("Michael");
 
 		readDeck();
+		
+		generateSeed();
+		
 		deckObject.shuffleDeck(seed);
+		
+		networkQueue.add(CallCodes.SET_SEED + seed);
 		
 		normalListener = new OnClickListener() {
 
@@ -406,6 +422,7 @@ public class CardGame extends Activity {
 				if (canDraw && !deckObject.isEmpty()) {
 					table = hand;
 					Card card = deckObject.drawCard();
+					networkQueue.add(CallCodes.DRAW_CARD);
 					if (card == null) {
 						card = NullCard.getInstance();
 					}
@@ -706,7 +723,7 @@ public class CardGame extends Activity {
 		if (card.canBeUsed()) {
 			card.toast(this);
 			handler.setup(activatedCard, targetCard);
-			handler.simulate();
+			handler.simulate(this);
 			showResult();
 		}
 		
@@ -761,6 +778,7 @@ public class CardGame extends Activity {
 					if (table.getCard(tag) == NullCard.getInstance()
 							&& table == players[0].getTable()) {
 						Log.d(TAG,"Seting card " + tag + " to " + handCard.getName());
+						networkQueue.add(CallCodes.PLAY_CARD + handCard.getImageID() + "-" + tag);
 						players[0].getTable().setCard(tag, handCard);
 						cardsOnTable++;
 						Log.d(TAG, "Done");
@@ -1009,5 +1027,74 @@ public class CardGame extends Activity {
 	 */
 	public void setSeed(long seed) {
 		this.seed = seed;
+	}
+	
+	/** Generates a seed for the deck. */
+	public void generateSeed() {
+		Date date = new Date();
+		Log.d(TAG, "date = " + date.getTime());
+		seed = date.getTime();
+	}
+	
+	public void parseCallCodes(String callCodes) {
+		Scanner parser = new Scanner(callCodes);
+		String command = "";
+		String arg     = "";
+		while (parser.hasNext()) {
+			command = parser.next(Pattern.compile("[a-zA-Z{2}]"));
+			arg    = "" + parser.nextInt();
+			executeCommand(command, arg, parser);
+		}
+	}
+
+	private void executeCommand(String command, String arg, Scanner parser) {
+		if (command.equals(CallCodes.ATTACK)) {
+			parser.next("-");
+			attack(arg, "" + parser.nextInt());
+		} else if (command.equals(CallCodes.DRAW_CARD)) {
+			drawToPlayer(arg);
+		} else if (command.equals(CallCodes.SET_SEED)) {
+			setSeed(Long.parseLong(arg));
+		} else if (command.equals(CallCodes.USE)) {
+			useItem(arg);
+		}
+	}
+		
+	private void useItem(String arg) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void drawToPlayer(String arg) {
+
+	}
+
+	private void attack(String arg, String string) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void addToQueue(String callCode) {
+		networkQueue.add(callCode);
+	}
+	
+	public void viewHealth(View v) {
+		Log.d(TAG, "viewHealth clicked");
+		promptBuilder = new AlertDialog.Builder(this);
+		
+		promptBuilder.setTitle("Player Health");
+		
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = 0; i < numOfPlayers; i++) {
+			sb.append(players[i].getName() + " " + players[i].getHealth() + "\n");
+		}
+		
+		TextView tv = new TextView(this);
+		tv.setText(sb.toString());
+		promptBuilder.setView(tv);
+		
+		prompt = promptBuilder.create();
+		prompt.show();
 	}
 }

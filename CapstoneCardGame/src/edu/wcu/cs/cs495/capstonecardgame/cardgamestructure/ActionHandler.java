@@ -1,8 +1,10 @@
 package edu.wcu.cs.cs495.capstonecardgame.cardgamestructure;
 
 import android.util.Log;
+import edu.wcu.cs.cs495.capstonecardgame.activities.CardGame;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.MonsterCard;
+import edu.wcu.cs.cs495.capstonecardgame.server.CallCodes;
 
 public class ActionHandler {
 	
@@ -32,7 +34,7 @@ public class ActionHandler {
 
 	}
 	
-	public void simulate() {
+	public void simulate(CardGame game) {
 		if (actor instanceof MonsterCard) {
 			if (victim instanceof MonsterCard) {
 				Log.d(TAG, actor.getName()  + "- A = " +  ((MonsterCard) actor).getAttack() + " D = " 
@@ -40,6 +42,7 @@ public class ActionHandler {
 						                    + " : " + victim.getName() + " A = " 
 						                    + ((MonsterCard) victim).getAttack() + " D = " 
 						                    + ((MonsterCard) victim).getDefense());
+				game.addToQueue(CallCodes.ATTACK + actor.getImageID() + "-" + victim.getImageID());
 				simualateAttack((MonsterCard) actor, (MonsterCard) victim);
 			} else {
 				

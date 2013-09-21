@@ -93,6 +93,7 @@ public class Deck {
 
     /** Shuffles the deck using a Fisher-Yates shuffling algorithm. */
 	public void shuffleDeck(long seed) {
+		Log.d(TAG, "Seed is " + seed);
 		Random random = new Random(seed);
 		int j;
 		for (int i = cards.length - 1; i >= 1; i--) {
