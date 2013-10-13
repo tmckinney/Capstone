@@ -53,6 +53,8 @@ public abstract class MonsterGameCard implements Card {
 	/** The card's description. */
 	private String description;
 	
+	private int owner;
+	
 	private Random random;
 	
 	protected int effect;
@@ -233,5 +235,13 @@ public abstract class MonsterGameCard implements Card {
 	
 	public void restoreImageID() {
 		imageID = oringinalImageID;
+	}
+	
+	public int getOwner() {
+		return owner;
+	}
+	
+	public void setOwner(int owner) {
+		this.owner = owner;
 	}
 }

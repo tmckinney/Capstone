@@ -40,4 +40,8 @@ public interface Card {
 	public void restoreImageID();
 
 	boolean toast(Context context);
+
+	public int getOwner();
+
+	public void setOwner(int owner);
 }

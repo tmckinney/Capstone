@@ -98,4 +98,15 @@ public class NullCard implements Card {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	@Override
+	public int getOwner() {
+		return -1;
+	}
+
+	@Override
+	public void setOwner(int owner) {
+		// TODO Auto-generated method stub
+		
+	}
 }

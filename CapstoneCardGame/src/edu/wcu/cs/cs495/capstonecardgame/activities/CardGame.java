@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -27,8 +26,6 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
-import android.widget.TextView;
-
 import edu.wcu.cs.cs495.capstonecardgame.R;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.ItemCard;
@@ -422,12 +419,13 @@ public class CardGame extends Activity {
 				if (canDraw && !deckObject.isEmpty()) {
 					table = hand;
 					Card card = deckObject.drawCard();
-					networkQueue.add(CallCodes.DRAW_CARD);
+					networkQueue.add(CallCodes.DRAW_CARD + "-" + currentPlayer + "-" + handIndex);
 					if (card == null) {
 						card = NullCard.getInstance();
 					}
 					
 					Log.d(TAG, "Drew a " + card.getName());
+					card.setOwner(currentPlayer);
 					hand.setCard(handIndex, card);
 					handIndex++;
 					drawTable();
@@ -778,7 +776,7 @@ public class CardGame extends Activity {
 					if (table.getCard(tag) == NullCard.getInstance()
 							&& table == players[0].getTable()) {
 						Log.d(TAG,"Seting card " + tag + " to " + handCard.getName());
-						networkQueue.add(CallCodes.PLAY_CARD + handCard.getImageID() + "-" + tag);
+						networkQueue.add(CallCodes.PLAY_CARD + "-" + currentPlayer + "-" + handCard.getImageID() + "-" + tag);
 						players[0].getTable().setCard(tag, handCard);
 						cardsOnTable++;
 						Log.d(TAG, "Done");
@@ -1049,14 +1047,29 @@ public class CardGame extends Activity {
 
 	private void executeCommand(String command, String arg, Scanner parser) {
 		if (command.equals(CallCodes.ATTACK)) {
+			int attackingPlayer = Integer.parseInt(arg);
 			parser.next("-");
-			attack(arg, "" + parser.nextInt());
+			int attacker = parser.nextInt();
+			parser.next("-");
+			int victimPlayer = parser.nextInt();
+			parser.next("-");
+			attack(attackingPlayer, attacker, victimPlayer, parser.nextInt());
 		} else if (command.equals(CallCodes.DRAW_CARD)) {
-			drawToPlayer(arg);
+			int player = Integer.parseInt(arg);
+			parser.next("-");
+			drawToPlayer(player, parser.nextInt());
 		} else if (command.equals(CallCodes.SET_SEED)) {
 			setSeed(Long.parseLong(arg));
 		} else if (command.equals(CallCodes.USE)) {
 			useItem(arg);
+		} else if (command.equals(CallCodes.PLAY_CARD)) {
+			int player = Integer.parseInt(arg);
+			parser.next("-");
+			int cardID = parser.nextInt();
+			parser.next("-");
+			int index  = parser.nextInt();
+			//Card card = player
+			//players[player].getTable().setCard(index, card);
 		}
 	}
 		
@@ -1065,13 +1078,19 @@ public class CardGame extends Activity {
 		
 	}
 
-	private void drawToPlayer(String arg) {
-
+	private void drawToPlayer(int player, int index) {
+		players[player].getTable().setCard(index, deckObject.drawCard());
 	}
 
-	private void attack(String arg, String string) {
-		// TODO Auto-generated method stub
-		
+	private void attack(int attackingPlayerID, 
+						int attackerCardID, 
+						int victimPlayerID, 
+						int victimCardID) {
+		Card actor  = players[attackingPlayerID].getTable().getCard(attackerCardID);
+		Card victim = players[victimPlayerID].getTable().getCard(victimCardID);
+		handler.setup(actor, victim);
+		handler.simulate(this);
+		showResult();
 	}
 
 	public void addToQueue(String callCode) {
@@ -1079,7 +1098,9 @@ public class CardGame extends Activity {
 	}
 	
 	public void viewHealth(View v) {
-		Log.d(TAG, "viewHealth clicked");
+		parseCallCodes("SS/1381629156316/DC/0/0/DC/0/1/PC/2/1/0/PC/3/4/1/AK/0/1/4");
+
+	/*	Log.d(TAG, "viewHealth clicked");
 		promptBuilder = new AlertDialog.Builder(this);
 		
 		promptBuilder.setTitle("Player Health");
@@ -1095,6 +1116,7 @@ public class CardGame extends Activity {
 		promptBuilder.setView(tv);
 		
 		prompt = promptBuilder.create();
-		prompt.show();
+		prompt.show();*/
+		
 	}
 }

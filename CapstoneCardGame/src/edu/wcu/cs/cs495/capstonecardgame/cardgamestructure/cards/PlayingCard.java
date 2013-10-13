@@ -84,4 +84,15 @@ public class PlayingCard implements Card {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	@Override
+	public int getOwner() {
+		return 0;
+	}
+
+	@Override
+	public void setOwner(int owner) {
+		// TODO Auto-generated method stub
+		
+	}
 }
