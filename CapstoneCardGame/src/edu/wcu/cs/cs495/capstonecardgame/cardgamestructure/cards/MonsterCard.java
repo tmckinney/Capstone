@@ -1,6 +1,8 @@
 package edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards;
 
+import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 public class MonsterCard extends MonsterGameCard {
 
@@ -19,7 +21,9 @@ public class MonsterCard extends MonsterGameCard {
 	private boolean imm;
 	private int[] statusTime;
 	
-	private int[] statusDamage;	
+	private int[] statusDamage;
+
+	private boolean isDead;	
 	
 	public MonsterCard(int imageID, String name, String description, String type, int health, int attack, int defense, double accuracy, float regen_rate, String effect) {
 		super(imageID, name, description);
@@ -35,6 +39,7 @@ public class MonsterCard extends MonsterGameCard {
 		this.statusDamage = new int[NUM_STATUS];
 		this.imm          = false;
 		this.accuracy     = accuracy;
+		this.isDead       = false;
 //		this.MAX_ACCURACY = accuracy;
 		
 		parseEffect(effect);
@@ -193,5 +198,46 @@ public class MonsterCard extends MonsterGameCard {
 		// TODO Auto-generated method stub
 		
 	}
+
+	public String getMana() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void kill() {
+		health = 0;
+		backupImageID();
+		imageID = -1;
+		isDead = true;
+	}
+	
+	public void fullRevive() {
+		health = MAX_HEALTH;
+		isDead = false;
+		restoreImageID();
+	}
+	
+	public boolean isDead() {
+		return isDead;
+	}
+
+	@Override
+	public boolean toast(Context context) {
+		if (isDead) {
+			Toast.makeText(context, "This card is dead!", Toast.LENGTH_SHORT).show();
+		} else if (imm) {
+			Toast.makeText(context, "This card is immobilized!", Toast.LENGTH_SHORT).show();		
+		} else {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean canBeUsed() {
+		return (!imm && !isDead);
+	}
+	
+	
 
 }

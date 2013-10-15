@@ -60,7 +60,8 @@
                 android:orientation="horizontal"
                 android:id="@+id/row1"
             	android:layout_width="wrap_content"
-            	android:layout_height="wrap_content" >
+            	android:layout_height="wrap_content"
+            	android:weightSum="4" >
             	
             </LinearLayout>
             
@@ -68,8 +69,8 @@
                 android:orientation="horizontal"
                 android:id="@+id/row2"
             	android:layout_width="wrap_content"
-            	android:layout_height="wrap_content" >
-            
+            	android:layout_height="wrap_content"
+            	android:weightSum="4" >            
             </LinearLayout>
         
         </LinearLayout>
@@ -88,7 +89,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:typeface="serif" 
-            android:textStyle="italic"/>
+            android:textStyle="italic"
+            android:onClick="viewHealth"/>
 
         <Button
             android:id="@+id/menu_2"

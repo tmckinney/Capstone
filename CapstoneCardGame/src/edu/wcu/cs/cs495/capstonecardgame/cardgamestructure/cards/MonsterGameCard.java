@@ -43,13 +43,17 @@ public abstract class MonsterGameCard implements Card {
 	protected static final int FIRST_NON_GENERIC_EFFECT = 5;
 	
     /** Integer ID mapping to an Android resource ID. */
-	private int imageID;
+	protected int imageID;
+	
+	protected int oringinalImageID;
 
     /** The name of the card. */
 	private String name;
 	
 	/** The card's description. */
 	private String description;
+	
+	private int owner;
 	
 	private Random random;
 	
@@ -224,5 +228,20 @@ public abstract class MonsterGameCard implements Card {
 	}
 	
 	public abstract int effect3(MonsterGameCard target);
-
+	
+	public void backupImageID() {
+		oringinalImageID = imageID;
+	}
+	
+	public void restoreImageID() {
+		imageID = oringinalImageID;
+	}
+	
+	public int getOwner() {
+		return owner;
+	}
+	
+	public void setOwner(int owner) {
+		this.owner = owner;
+	}
 }

@@ -1,5 +1,7 @@
 package edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards;
 
+import android.content.Context;
+
 /**
  * Class modeling a playing card.
  *
@@ -62,6 +64,35 @@ public class PlayingCard implements Card {
 	@Override
 	public void setName(String string) {
 		name = string;
+		
+	}
+
+	@Override
+	public boolean canBeUsed() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void restoreImageID() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean toast(Context context) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public int getOwner() {
+		return 0;
+	}
+
+	@Override
+	public void setOwner(int owner) {
+		// TODO Auto-generated method stub
 		
 	}
 }

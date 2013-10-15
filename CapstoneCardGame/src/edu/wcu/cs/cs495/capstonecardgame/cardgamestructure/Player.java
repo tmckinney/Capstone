@@ -1,5 +1,9 @@
 package edu.wcu.cs.cs495.capstonecardgame.cardgamestructure;
 
+import edu.wcu.cs.cs495.capstonecardgame.activities.CardGame;
+import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
+import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.NullCard;
+
 /**
  * Player.java
  * A class to model a player in a card game.
@@ -21,6 +25,18 @@ public class Player {
 	/** The player's health */
 	private int health;
 	
+	/** The player's ID */
+	private int ID;
+	
+	/** The player's hand; */
+	private Table hand;
+	
+	/** The index into the players hand. */
+	private int handIndex;
+
+	/** Boolean indicating whether or not the player can draw. */
+	private boolean canDraw;
+	
     /**
      * Constructor to set up the <code>Player</code> fields.
      *
@@ -40,6 +56,7 @@ public class Player {
 		//	card = deck.drawCard();
 		//}
 		
+		hand   = new Table();
 		table  = new Table();
 		health = MAX_HEALTH;
 	}
@@ -77,6 +94,41 @@ public class Player {
 	public String toString() {
 		return name + ": " + health + ":" + table.toString();
 	}
+
+	public Table getHand() {
+		return hand;
+	}
+
+	public void setHand(Table hand) {
+		this.hand = hand;
+	}
+
+	public int getHandIndex() {
+		return handIndex;
+	}
+
+	public void addToHand(Card card) {
+		hand.setCard(handIndex, card);
+		handIndex++;
+	}
 	
+	public void removeFromHand(int tag) {
+		for (int i = tag; i < CardGame.NUM_OF_CARDS - 1; i++) {
+			hand.setCard(i, hand.getCard(i + 1));
+		}
+		hand.setCard(CardGame.NUM_OF_CARDS - 1, NullCard.getInstance());
+		if (handIndex > 0) {
+			handIndex--;
+		}
+		canDraw = true;
+	}
+
+	public void setCanDraw(boolean canDraw) {
+		this.canDraw = canDraw;
+	}
+	
+	public boolean canDraw() {
+		return canDraw;
+	}
 
 }

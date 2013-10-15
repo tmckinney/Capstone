@@ -70,5 +70,9 @@ public interface DatabaseInterface {
 	static final String I_IMAGE         = "itemTrapImage";
 
 	static final String EFFECT          = "effect";
+	
+	static final String INFO_TABLE      = "Information";
+	
+	static final String NUMCARDS        = "NumCards";
 
 }
