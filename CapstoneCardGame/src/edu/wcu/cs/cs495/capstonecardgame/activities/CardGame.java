@@ -2,9 +2,6 @@
 package edu.wcu.cs.cs495.capstonecardgame.activities;
 
 import java.util.Date;
-import java.util.Scanner;
-import java.util.regex.Pattern;
-
 import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
@@ -81,10 +78,10 @@ public class CardGame extends Activity {
 	private int numOfPlayers;
 	
 	/** The current player selected to view table. */
-	private int currentPlayer;
+//	private int currentPlayerIndex;
 	
 	/** The next slot in the player's hand available for use. */
-	private int handIndex;
+//	private int handIndex;
 
 	/** The number of cards on the player's table. */
 	private int cardsOnTable;
@@ -141,7 +138,7 @@ public class CardGame extends Activity {
 	private Table table;
 
 	/** The player's hand/ */
-	private Table hand;
+//	private Table hand;
 
 	/** Deck modeling the discard pile of a card game. */
 	private Deck discardObject;
@@ -180,6 +177,12 @@ public class CardGame extends Activity {
 	private Card targetCard;
 	
 	private NetworkQueue networkQueue;
+	
+//	private Player currentPlayer;
+
+	private Player thisPlayer;
+	
+	private Table myHand;
 
 	/** 
 	 * Specifies the behavior of the <code>Activity</code> as soon as it is
@@ -358,22 +361,28 @@ public class CardGame extends Activity {
 
 
 		this.numOfPlayers    = 4;
-		this.handIndex       = 0;
 		this.canDraw         = true;
 		this.canPlay         = true;
 		this.canDiscardHand  = true;
 		this.canDiscardTable = true;
 		this.players         = new Player[numOfPlayers];
 		this.discardObject   = new Deck(NUM_OF_CARDS, false);
-		this.hand            = new Table();
-		this.table           = hand;
 		this.selectingTarget = false;
 		this.networkQueue    = new NetworkQueue();
+		//TODO Remove after testing
+		this.players[0] = new Player("Tyler");
+		this.players[1] = new Player("Tamara");
+		this.players[2] = new Player("Jae");
+		this.players[3] = new Player("Michael");
 		
-		players[0] = new Player("Tyler");
-		players[1] = new Player("Tamara");
-		players[2] = new Player("Jae");
-		players[3] = new Player("Michael");
+		this.playerID   = 0;
+		//TODO End testing 
+		
+//		this.currentPlayer = players[0];
+		this.thisPlayer    = players[playerID];
+		this.myHand        = thisPlayer.getHand();
+		
+		this.table    = myHand;
 
 		readDeck();
 		
@@ -381,7 +390,9 @@ public class CardGame extends Activity {
 		
 		deckObject.shuffleDeck(seed);
 		
-		networkQueue.add(CallCodes.SET_SEED + seed);
+		networkQueue.add(CallCodes.SET_SEED 
+				         + CallCodes.SEPARATOR + seed
+				         + CallCodes.SEPARATOR);
 		
 		normalListener = new OnClickListener() {
 
@@ -392,7 +403,7 @@ public class CardGame extends Activity {
 			}
 		};
 		
-		health.setText("" + players[0].getHealth());
+		health.setText("" + thisPlayer.getHealth());
 		
 		handler = ActionHandler.getInstance();
 	}
@@ -414,22 +425,24 @@ public class CardGame extends Activity {
 	/** Helper method to set the Deck listeners. */
 	private void setDeckListeners() {
 		deck.setOnClickListener(new OnClickListener() {
+
 			@Override
 			public void onClick(View v) {
 				if (canDraw && !deckObject.isEmpty()) {
-					table = hand;
+					table = myHand;
 					Card card = deckObject.drawCard();
-					networkQueue.add(CallCodes.DRAW_CARD + "-" + currentPlayer + "-" + handIndex);
+					networkQueue.add(CallCodes.DRAW_CARD 
+									 + CallCodes.SEPARATOR + playerID 
+									 + CallCodes.SEPARATOR);
 					if (card == null) {
 						card = NullCard.getInstance();
 					}
 					
 					Log.d(TAG, "Drew a " + card.getName());
-					card.setOwner(currentPlayer);
-					hand.setCard(handIndex, card);
-					handIndex++;
+					card.setOwner(playerID);
+					thisPlayer.addToHand(card);
 					drawTable();
-					if (handIndex == NUM_OF_CARDS) {
+					if (thisPlayer.getHandIndex() == NUM_OF_CARDS) {
 						canDraw = false;
 					}
 					if (deckObject.isEmpty()) {
@@ -465,7 +478,6 @@ public class CardGame extends Activity {
 				Log.d(TAG,
 						"Player view changed to " + rb.getText() + "; with tag " + rb.getTag());
 				int tag = Integer.parseInt((String) rb.getTag());
-				currentPlayer = tag;
 				table = players[tag].getTable();
 				drawTable();
 				
@@ -494,9 +506,9 @@ public class CardGame extends Activity {
 		if (table.getCard((Integer) card.getTag()) != NullCard.getInstance()) {
 			if (selectingTarget) {
 				targetCard = getTargetCard(card);
-			} else if (table == hand) {
+			} else if (table == myHand) {
 				clickedHandCard(card);
-			} else if (table == players[0].getTable()){
+			} else if (table == thisPlayer.getTable()){
 				clickedTableCard(card);
 			}
 		}
@@ -762,8 +774,8 @@ public class CardGame extends Activity {
 	private void playCard(View viewCard) {
 		final int handIndex = (Integer) viewCard.getTag();
 		Log.d(TAG, "playing card : " + handIndex);
-		final Card handCard  = hand.getCard(handIndex);
-		table = players[0].getTable();
+		final Card handCard  = myHand.getCard(handIndex);
+		table = thisPlayer.getTable();
 		playerRadios.check(R.id.player_1_radio);
 		drawTable();
 		playingCard = true;
@@ -774,17 +786,21 @@ public class CardGame extends Activity {
 					int tag = (Integer) tableCard.getTag();
 					Log.d(TAG, "clicked card : " + tag);
 					if (table.getCard(tag) == NullCard.getInstance()
-							&& table == players[0].getTable()) {
+							&& table == thisPlayer.getTable()) {
 						Log.d(TAG,"Seting card " + tag + " to " + handCard.getName());
-						networkQueue.add(CallCodes.PLAY_CARD + "-" + currentPlayer + "-" + handCard.getImageID() + "-" + tag);
-						players[0].getTable().setCard(tag, handCard);
+						networkQueue.add(CallCodes.PLAY_CARD 
+										 + CallCodes.SEPARATOR + playerID 
+										 + CallCodes.SEPARATOR + handCard.getImageID() 
+										 + CallCodes.SEPARATOR + tag
+										 + CallCodes.SEPARATOR);
+						thisPlayer.getTable().setCard(tag, handCard);
 						cardsOnTable++;
 						Log.d(TAG, "Done");
 						drawTable();
 						Log.d(TAG, "removeing card");
-						removeCard(handIndex);
+						removeCard(playerID, handIndex);
 						Log.d(TAG, "done");
-						table = hand;
+						table = myHand;
 						drawTable();
 						if (cardsOnTable == NUM_OF_CARDS) {
 							canPlay = false;
@@ -797,16 +813,9 @@ public class CardGame extends Activity {
 	}
 	
 	/** Helper method to remove a card from the hand array. */
-	private void removeCard(int tag) {
-		for (int i = tag; i < NUM_OF_CARDS - 1; i++) {
-			hand.setCard(i, hand.getCard(i + 1));
-		}
-		hand.setCard(NUM_OF_CARDS - 1, NullCard.getInstance());
-		if (handIndex > 0) {
-			handIndex--;
-		}
+	private void removeCard(int player, int tag) {
+		players[player].removeFromHand(tag);
 		drawTable();
-		canDraw = true;
 	}
 
 	/**
@@ -831,12 +840,12 @@ public class CardGame extends Activity {
 		tableCard.restoreImageID();
 		
 		if (table.getCard(tag) != NullCard.getInstance()) {
-			if (table == hand) {
-				discard.setImageResource(getImageId(hand.getCard(tag).getImageID(), hand.getCard(tag).getName()));
-				discardObject.addCard(hand.getCard(tag));
-				removeCard(tag);
-			} else if (table == players[0].getTable()){
-				Table playerTable  = players[0].getTable();
+			if (table == myHand) {
+				discard.setImageResource(getImageId(myHand.getCard(tag).getImageID(), myHand.getCard(tag).getName()));
+				discardObject.addCard(myHand.getCard(tag));
+				removeCard(playerID, tag);
+			} else if (table == thisPlayer.getTable()){
+				Table playerTable  = thisPlayer.getTable();
 				discard.setImageResource(getImageId(playerTable.getCard(tag).getImageID(), playerTable.getCard(tag).getName())); 
 				discardObject.addCard(playerTable.getCard(tag));
 				playerTable.setCard(tag, NullCard.getInstance());
@@ -925,7 +934,7 @@ public class CardGame extends Activity {
 		viewChanged();
 		Log.d(TAG, "view hand");
 		playerRadios.check(R.id.player_1_radio);
-		table = hand;
+		table = myHand;
 		drawTable();
 	}
 
@@ -937,7 +946,7 @@ public class CardGame extends Activity {
 	public void viewTable(View v) {
 		viewChanged();
 		Log.d(TAG, "view table");
-		table = players[currentPlayer].getTable();
+		table = thisPlayer.getTable();
 		drawTable();
 	}
 
@@ -1025,6 +1034,8 @@ public class CardGame extends Activity {
 	 */
 	public void setSeed(long seed) {
 		this.seed = seed;
+		//TODO Remove after testing
+		seed = Long.parseLong("1381629156316");
 	}
 	
 	/** Generates a seed for the deck. */
@@ -1034,42 +1045,56 @@ public class CardGame extends Activity {
 		seed = date.getTime();
 	}
 	
+	/**
+	 * Parses a string sent from the game server containing a list of commands. 
+	 * 
+	 * @param callCodes <code>String</code> containing a list of commands encoded 
+	 * in the <code>CallCodes</code> class.
+	 */
 	public void parseCallCodes(String callCodes) {
-		Scanner parser = new Scanner(callCodes);
 		String command = "";
 		String arg     = "";
-		while (parser.hasNext()) {
-			command = parser.next(Pattern.compile("[a-zA-Z{2}]"));
-			arg    = "" + parser.nextInt();
-			executeCommand(command, arg, parser);
+		String[] tokens = callCodes.split("/");
+		int token = 0;
+		while (tokens[token] != null) {
+			command = tokens[token++];
+			arg    = tokens[token++];
+			executeCommand(command, arg, tokens, token);
 		}
 	}
 
-	private void executeCommand(String command, String arg, Scanner parser) {
+	/**
+	 * Executes the command parsed by <code>parseCallCodes</code> using the 
+	 * single parsed argument. Parses other arguments as needed.
+	 * 
+	 * @param command The command to execute.
+	 * @param arg     The first argument to the command.
+	 * @param tokens  List of tokens possible containing more arguments.
+	 * @param token   The current index into tokens to use.
+	 */
+	private void executeCommand(String command, 
+								String arg, 
+								String[] tokens, 
+								int token) {
 		if (command.equals(CallCodes.ATTACK)) {
 			int attackingPlayer = Integer.parseInt(arg);
-			parser.next("-");
-			int attacker = parser.nextInt();
-			parser.next("-");
-			int victimPlayer = parser.nextInt();
-			parser.next("-");
-			attack(attackingPlayer, attacker, victimPlayer, parser.nextInt());
+			int attacker = Integer.parseInt(tokens[token++]);
+			int victimPlayer = Integer.parseInt(tokens[token++]);
+			int victimCard = Integer.parseInt(tokens[token++]);
+			attack(attackingPlayer, attacker, victimPlayer, victimCard);
 		} else if (command.equals(CallCodes.DRAW_CARD)) {
 			int player = Integer.parseInt(arg);
-			parser.next("-");
-			drawToPlayer(player, parser.nextInt());
+			drawToPlayer(player);
 		} else if (command.equals(CallCodes.SET_SEED)) {
 			setSeed(Long.parseLong(arg));
 		} else if (command.equals(CallCodes.USE)) {
 			useItem(arg);
 		} else if (command.equals(CallCodes.PLAY_CARD)) {
 			int player = Integer.parseInt(arg);
-			parser.next("-");
-			int cardID = parser.nextInt();
-			parser.next("-");
-			int index  = parser.nextInt();
-			//Card card = player
-			//players[player].getTable().setCard(index, card);
+			int cardID = Integer.parseInt(tokens[token++]);
+			int index  = Integer.parseInt(tokens[token++]);
+			Card card = players[player].getHand().getCard(cardID);
+			players[player].getTable().setCard(index, card);
 		}
 	}
 		
@@ -1078,8 +1103,13 @@ public class CardGame extends Activity {
 		
 	}
 
-	private void drawToPlayer(int player, int index) {
-		players[player].getTable().setCard(index, deckObject.drawCard());
+	/**
+	 * Draws a card from the deck and places it in the given players hand.
+	 * @param player
+	 * @param index
+	 */
+	private void drawToPlayer(int player) {
+		players[player].addToHand(deckObject.drawCard());
 	}
 
 	private void attack(int attackingPlayerID, 
@@ -1098,7 +1128,7 @@ public class CardGame extends Activity {
 	}
 	
 	public void viewHealth(View v) {
-		parseCallCodes("SS/1381629156316/DC/0/0/DC/0/1/PC/2/1/0/PC/3/4/1/AK/0/1/4");
+		parseCallCodes("SS/1381629156316/DC/1/DC/2/PC/1/0/0/PC/1/0/0/AK/1/0/2/0");
 
 	/*	Log.d(TAG, "viewHealth clicked");
 		promptBuilder = new AlertDialog.Builder(this);

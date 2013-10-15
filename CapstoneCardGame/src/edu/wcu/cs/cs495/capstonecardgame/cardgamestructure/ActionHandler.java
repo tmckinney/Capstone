@@ -42,8 +42,12 @@ public class ActionHandler {
 						                    + " : " + victim.getName() + " A = " 
 						                    + ((MonsterCard) victim).getAttack() + " D = " 
 						                    + ((MonsterCard) victim).getDefense());
-				game.addToQueue(CallCodes.ATTACK + actor.getOwner() + "-" + actor.getImageID() + "-" 
-						                    + victim.getImageID());
+				game.addToQueue(CallCodes.ATTACK 
+								+ CallCodes.SEPARATOR + actor.getOwner() 
+							    + CallCodes.SEPARATOR + actor.getImageID()
+							    + CallCodes.SEPARATOR + victim.getOwner()
+							    + CallCodes.SEPARATOR + victim.getImageID()
+							    + CallCodes.SEPARATOR);
 				simualateAttack((MonsterCard) actor, (MonsterCard) victim);
 			} else {
 				
