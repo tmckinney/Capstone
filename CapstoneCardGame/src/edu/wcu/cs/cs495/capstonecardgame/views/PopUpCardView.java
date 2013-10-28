@@ -90,6 +90,4 @@ public class PopUpCardView extends LinearLayout {
 		imageView.setImageResource(CardGame.getImageId(card.getImageID(), card.getName()));
 		nameView.setText(card.getName());
 	}
-	
-
 }

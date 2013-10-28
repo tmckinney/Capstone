@@ -22,10 +22,11 @@ public final class R {
         public static final int mp=0x7f020008;
         public static final int nc=0x7f020009;
         public static final int splash1wdescription3=0x7f02000a;
-        public static final int splash2wdescription=0x7f02000b;
-        public static final int wood=0x7f02000c;
-        public static final int ytsorf=0x7f02000d;
-        public static final int zn=0x7f02000e;
+        public static final int splash1wdescription3a=0x7f02000b;
+        public static final int splash2wdescription=0x7f02000c;
+        public static final int wood=0x7f02000d;
+        public static final int ytsorf=0x7f02000e;
+        public static final int zn=0x7f02000f;
     }
     public static final class id {
         public static final int button1=0x7f070000;

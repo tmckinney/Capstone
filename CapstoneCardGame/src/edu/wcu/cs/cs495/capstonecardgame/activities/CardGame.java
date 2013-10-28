@@ -1,15 +1,11 @@
 //23456789//23456789//23456789//23456789//23456789//23456789//23456789//23456789
 package edu.wcu.cs.cs495.capstonecardgame.activities;
 
-import java.util.Date;
 import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -24,6 +20,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import edu.wcu.cs.cs495.capstonecardgame.R;
+import edu.wcu.cs.cs495.capstonecardgame.activities.activityhelpers.DeckBuilder;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.ItemCard;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.MonsterCard;
@@ -38,8 +35,6 @@ import edu.wcu.cs.cs495.capstonecardgame.views.BattleView;
 import edu.wcu.cs.cs495.capstonecardgame.views.PopUpCardView;
 import edu.wcu.cs.cs495.capstonecardgame.views.PopUpItemCardView;
 import edu.wcu.cs.cs495.capstonecardgame.views.PopUpMonsterCardView;
-import edu.wcu.cs.cs495.capstonecardgame.database.DataBaseHelper;
-import edu.wcu.cs.cs495.capstonecardgame.database.DatabaseInterface;
 
 
 /**
@@ -271,85 +266,7 @@ public class CardGame extends Activity {
 		}
 	}
 	
-	private void readDeck() {
-   
-        SQLiteDatabase db = null;
-        DataBaseHelper myDbHelper = new DataBaseHelper(this);
-        
-        try {
-        	
-	        myDbHelper.openDataBase();
-	        db = myDbHelper.getMyDataBase();
-	        
-        } catch(SQLException sqle){
 
-        	Log.e(TAG, "Caught SQL exception");
-
-        }
-        
-        Cursor cur = db.query(DatabaseInterface.ITEM_TRAP_TABLE, null, null, null, null, null, null);
-		cur.moveToFirst();
-		int totalCards = cur.getCount();
-		Log.d(TAG, "Total cards = " + totalCards);
-		cur = db.query(DatabaseInterface.MONSTER_TABLE, null, null, null, null, null, null);
-		cur.moveToFirst();
-		totalCards += cur.getCount();
-		Log.d(TAG, "Total cards = " + totalCards);
-		
-		Log.d(DatabaseInterface.MONSTER_TABLE, "" + cur.getCount());
-
-		deckObject = new Deck(totalCards, false);
-		
-		
-		while (!cur.isAfterLast()) {
-			
-			int defense = cur.getInt(cur.getColumnIndex(DatabaseInterface.DEFENSE_POINTS));
-			String effect = cur.getString(cur.getColumnIndex(DatabaseInterface.EFFECT));			
-			int id= cur.getInt(cur.getColumnIndex(DatabaseInterface.M_CARD_ID));
-			String name = cur.getString(cur.getColumnIndex(DatabaseInterface.M_NAME));
-			Log.i(TAG, "Building " + name + " id = " + id);
-			String description = cur.getString(cur.getColumnIndex(DatabaseInterface.M_DISC));
-			String type = cur.getString(cur.getColumnIndex(DatabaseInterface.TYPE));
-			int health = cur.getInt(cur.getColumnIndex(DatabaseInterface.HP));
-			int attack = cur.getInt(cur.getColumnIndex(DatabaseInterface.ATTACK_POINTS));
-			int accuracy = 100; //cur.getInt(cur.getColumnIndex(DatabaseInterface.ACCURACY));
-			float regen_rate = cur.getFloat(cur.getColumnIndex(DatabaseInterface.REGEN_RATE));
-
-			
-			MonsterCard card = new MonsterCard(id, name, description, type, health, attack, defense, accuracy, regen_rate, effect);
-			deckObject.addCard(card);
-			
-			cur.moveToNext();
-			
-			Log.d(TAG, "Deck Size : " + deckObject.getSize());
-		}
-		
-		cur = db.query(DatabaseInterface.ITEM_TRAP_TABLE, null, null, null, null, null, null);
-		cur.moveToFirst();
-		while (!cur.isAfterLast()) {
-/*			Log.d(DatabaseInterface.ITEM_TRAP_TABLE, "" + cur.getCount());
-			Log.d(DatabaseInterface.ITEM_TRAP_TABLE, "" + cur.getInt(cur.getColumnIndex(DatabaseInterface.I_CARD_ID)));
-			Log.d(DatabaseInterface.ITEM_TRAP_TABLE, cur.getString(cur.getColumnIndex(DatabaseInterface.I_NAME)));
-			Log.d(DatabaseInterface.ITEM_TRAP_TABLE, cur.getString(cur.getColumnIndex(DatabaseInterface.I_POWER)));
-			Log.d(DatabaseInterface.ITEM_TRAP_TABLE, "" + cur.getString(cur.getColumnIndex(DatabaseInterface.I_DISCRIPTION)));
-			Log.d(DatabaseInterface.ITEM_TRAP_TABLE, "" + cur.getInt(cur.getColumnIndex(DatabaseInterface.ONE_TIME_USE)));
-			*/
-			int id = cur.getInt(cur.getColumnIndex(DatabaseInterface.I_CARD_ID));
-			String name = cur.getString(cur.getColumnIndex(DatabaseInterface.I_NAME));
-			Log.i(TAG, "Building " + name + " id = " + id);
-			String description = cur.getString(cur.getColumnIndex(DatabaseInterface.I_DISCRIPTION));
-			String power = cur.getString(cur.getColumnIndex(DatabaseInterface.EFFECT));
-			boolean oneTimeUse = (cur.getInt(cur.getColumnIndex(DatabaseInterface.ONE_TIME_USE)) == 0 ? true : false);
-			
-			ItemCard card = new ItemCard(id, name, description, power, oneTimeUse);
-			deckObject.addCard(card);
-			
-			cur.moveToNext();
-			Log.d(TAG, "Deck Size : " + deckObject.getSize());
-		}
-		
-		myDbHelper.close();
-	}
 	
 	/** Helper method to initialize some of the fields. */
 	private void init(Bundle bundle) {
@@ -384,10 +301,13 @@ public class CardGame extends Activity {
 		
 		this.table    = myHand;
 
-		readDeck();
+		deckObject = DeckBuilder.readDeck(deckObject, this);
 		
-		generateSeed();
+		Log.d(TAG, "Deck is " + ((deckObject == null) ? "null" : "not null"));
 		
+		//TODO: Fix after testing.
+		seed = 1382920215105l; //System.currentTimeMillis();
+				
 		deckObject.shuffleDeck(seed);
 		
 		networkQueue.add(CallCodes.SET_SEED 
@@ -538,7 +458,7 @@ public class CardGame extends Activity {
 			cardView = new PopUpItemCardView(this);
 		}
 		((PopUpCardView) cardView).setAll(table.getCard((Integer) handCard.getTag()));
-		promptBuilder.setView(cardView);
+		promptBuilder.setView((View) cardView);
 
 		promptBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
@@ -603,7 +523,7 @@ public class CardGame extends Activity {
 			cardView = new PopUpItemCardView(this);
 		}
 		((PopUpCardView) cardView).setAll(table.getCard((Integer) tableCard.getTag()));
-		promptBuilder.setView(cardView);
+		promptBuilder.setView((View) cardView);
 
 		promptBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
@@ -686,10 +606,9 @@ public class CardGame extends Activity {
 		promptBuilder.setTitle(action);
 	
 		//promptBuilder.setView(View v);
-		cardView = (View) new BattleView(this);
+		cardView = new BattleView(this);
 		((BattleView) cardView).setAll(activatedCard, table.getCard((Integer) tableCard.getTag()));
-		promptBuilder.setView(cardView);
-
+		promptBuilder.setView((View) cardView);
 		
 		promptBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			
@@ -717,10 +636,9 @@ public class CardGame extends Activity {
 			}
 
 		});
-		
+
 		prompt = promptBuilder.create();
 		prompt.show();
-
 		return card;
 	}
 
@@ -748,11 +666,12 @@ public class CardGame extends Activity {
 		
 		promptBuilder.setTitle("Aftermath");
 		
-		cardView = (View) new BattleView(this);
+		cardView = new BattleView(this);
 		((BattleView) cardView).setAll(activatedCard, targetCard);
-		promptBuilder.setView(cardView);
+		promptBuilder.setView((View) cardView);
 		
 		prompt = promptBuilder.create();
+
 		prompt.show();
 		
 		Handler handler = new Handler();
@@ -841,18 +760,21 @@ public class CardGame extends Activity {
 		
 		if (table.getCard(tag) != NullCard.getInstance()) {
 			if (table == myHand) {
-				discard.setImageResource(getImageId(myHand.getCard(tag).getImageID(), myHand.getCard(tag).getName()));
+				int imageID = getImageId(myHand.getCard(tag).getImageID(), myHand.getCard(tag).getName());
+				Log.d(TAG, "imageID = " + imageID);
+				discard.setImageResource(imageID);
 				discardObject.addCard(myHand.getCard(tag));
 				removeCard(playerID, tag);
+				canDraw = true;
 			} else if (table == thisPlayer.getTable()){
 				Table playerTable  = thisPlayer.getTable();
 				discard.setImageResource(getImageId(playerTable.getCard(tag).getImageID(), playerTable.getCard(tag).getName())); 
 				discardObject.addCard(playerTable.getCard(tag));
 				playerTable.setCard(tag, NullCard.getInstance());
 				cardsOnTable--;
-				drawTable();
-				canDraw = true;
+				canPlay = true;
 			}
+			drawTable();
 		}
 	}
 	
@@ -1038,13 +960,6 @@ public class CardGame extends Activity {
 		seed = Long.parseLong("1381629156316");
 	}
 	
-	/** Generates a seed for the deck. */
-	public void generateSeed() {
-		Date date = new Date();
-		Log.d(TAG, "date = " + date.getTime());
-		seed = date.getTime();
-	}
-	
 	/**
 	 * Parses a string sent from the game server containing a list of commands. 
 	 * 
@@ -1055,11 +970,13 @@ public class CardGame extends Activity {
 		String command = "";
 		String arg     = "";
 		String[] tokens = callCodes.split("/");
-		int token = 0;
+		Integer token = 0;
 		while (tokens[token] != null) {
 			command = tokens[token++];
-			arg    = tokens[token++];
-			executeCommand(command, arg, tokens, token);
+			arg     = tokens[token++];
+			Log.d(TAG, "command = " + command);
+			Log.d(TAG, "arg     = " + arg);
+			token = executeCommand(command, arg, tokens, token);
 		}
 	}
 
@@ -1072,30 +989,38 @@ public class CardGame extends Activity {
 	 * @param tokens  List of tokens possible containing more arguments.
 	 * @param token   The current index into tokens to use.
 	 */
-	private void executeCommand(String command, 
+	private int executeCommand(String command, 
 								String arg, 
 								String[] tokens, 
-								int token) {
+								Integer token) {
 		if (command.equals(CallCodes.ATTACK)) {
 			int attackingPlayer = Integer.parseInt(arg);
 			int attacker = Integer.parseInt(tokens[token++]);
 			int victimPlayer = Integer.parseInt(tokens[token++]);
 			int victimCard = Integer.parseInt(tokens[token++]);
-			attack(attackingPlayer, attacker, victimPlayer, victimCard);
+			Log.d(TAG, "Attack called - " + attackingPlayer + ", " + attacker + ", " + victimPlayer + ", " + victimCard);
+			//attack(attackingPlayer, attacker, victimPlayer, victimCard);
+			Log.d(TAG, "Attack complete");
 		} else if (command.equals(CallCodes.DRAW_CARD)) {
 			int player = Integer.parseInt(arg);
+			Log.d(TAG, "Draw called");
 			drawToPlayer(player);
 		} else if (command.equals(CallCodes.SET_SEED)) {
+			Log.d(TAG, "Set called");
 			setSeed(Long.parseLong(arg));
 		} else if (command.equals(CallCodes.USE)) {
 			useItem(arg);
 		} else if (command.equals(CallCodes.PLAY_CARD)) {
+
 			int player = Integer.parseInt(arg);
 			int cardID = Integer.parseInt(tokens[token++]);
 			int index  = Integer.parseInt(tokens[token++]);
 			Card card = players[player].getHand().getCard(cardID);
+			Log.d(TAG, "Play called: " + card.getName() + " to player " + player);
 			players[player].getTable().setCard(index, card);
 		}
+		drawTable();
+		return token;
 	}
 		
 	private void useItem(String arg) {
@@ -1109,9 +1034,12 @@ public class CardGame extends Activity {
 	 * @param index
 	 */
 	private void drawToPlayer(int player) {
-		players[player].addToHand(deckObject.drawCard());
+		Card card = deckObject.drawCard();
+		Log.d(TAG, "Card name: " + card.getName());
+		players[player].addToHand(card);
 	}
 
+	@SuppressWarnings("unused")
 	private void attack(int attackingPlayerID, 
 						int attackerCardID, 
 						int victimPlayerID, 
@@ -1128,7 +1056,7 @@ public class CardGame extends Activity {
 	}
 	
 	public void viewHealth(View v) {
-		parseCallCodes("SS/1381629156316/DC/1/DC/2/PC/1/0/0/PC/1/0/0/AK/1/0/2/0");
+		parseCallCodes("SS/1382920215105/DC/1/DC/2/PC/1/0/0/PC/1/0/0/AK/1/0/2/0");
 
 	/*	Log.d(TAG, "viewHealth clicked");
 		promptBuilder = new AlertDialog.Builder(this);

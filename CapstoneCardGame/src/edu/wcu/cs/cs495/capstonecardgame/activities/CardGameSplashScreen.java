@@ -1,22 +1,33 @@
 package edu.wcu.cs.cs495.capstonecardgame.activities;
 
 import java.io.IOException;
+import java.util.Date;
 
 import edu.wcu.cs.cs495.capstonecardgame.database.DataBaseHelper;
 import edu.wcu.cs.cs495.capstonecardgame.database.DatabaseInterface;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 
 public class CardGameSplashScreen extends Activity implements DatabaseInterface {
-
+	
+	private static final String TAG = null;
+	public final int MAX_DELAY = 3000;
+	
 	 @Override
 	    protected void onCreate(Bundle savedInstanceState) {
 	        super.onCreate(savedInstanceState);
 	        setContentView(edu.wcu.cs.cs495.capstonecardgame.R.layout.splash_screen_layout);
 	        
 	        DataBaseHelper myDbHelper = new DataBaseHelper(this);
+	        
+	        Handler handler = new Handler();
+			final Intent i = new Intent(this, CardGameMenu.class);
+
+	        long startTime = System.currentTimeMillis();
 
 	        try {
 
@@ -29,18 +40,23 @@ public class CardGameSplashScreen extends Activity implements DatabaseInterface 
 	        }
 	        
 	        myDbHelper.close();
-			
-	        try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 	        
-			Intent i = new Intent(this, CardGameMenu.class);
-			startActivity(i);
-			
-			this.onStop();    	
+	        long time = System.currentTimeMillis() - startTime;
+	        long delayMillis;
+	        Log.d(TAG, "time = " + time);
+	        if (time < MAX_DELAY) {
+	        	delayMillis = MAX_DELAY - time;
+	        } else {
+	        	delayMillis = 0;
+	        }
+	        Log.d(TAG, "delay = " + delayMillis);
+	        handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					startActivity(i);
+					finish();
+				}	        	
+	        }, delayMillis);
 	    }
 	    
 	    /**

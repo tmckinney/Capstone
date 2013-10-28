@@ -16,7 +16,6 @@ public class CardGameMenu extends Activity {
 	}
 	
 	public void newGame(View v) {
-
 		Intent i = new Intent(this, CardGame.class);
 		startActivity(i);
 	}

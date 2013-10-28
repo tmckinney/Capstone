@@ -4,6 +4,9 @@ import edu.wcu.cs.cs495.capstonecardgame.activities.CardGame;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -18,25 +21,59 @@ public class BattleView extends LinearLayout {
 	private   ImageView            leftImage;
 	private   ImageView            rightImage;
 	private   ScrollView           scroller;
-	private   HorizontalScrollView hscroller;
 	private   TextView             leftName;
 	private   TextView             rightName;
 	protected TextView             leftDescription;
 	protected TextView             rightDescription;
 	private   Context              context;
+	private   boolean              finished;
+	private   boolean              drawn;
+	private   boolean              done;
+	private   int                  lastSample;
+	private   int                  sameLastSample;
+	
 	
 	public BattleView(Context context) {
 		super(context);
 		this.setOrientation(VERTICAL);
 		
 		this.context = context;
+		this.finished = false;
+		this.drawn = false;
+		this.done = false;
 		
-		hscroller = new HorizontalScrollView(context);
 		scroller  = new ScrollView(context);
 		
 		cards = new LinearLayout(context);
 		leftCard = new LinearLayout(context);
 		rightCard = new LinearLayout(context);
+
+		ViewTreeObserver tableObserver = cards.getViewTreeObserver();
+
+		tableObserver.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			
+			private final int MAX_LAST_SAMPLE = 10;
+			
+			@Override
+			public void onGlobalLayout() {
+				Log.d("BCV", "Layout changed");
+				if (!drawn && !done && !finished) {
+					int thisSample = updateWidths();
+					if (thisSample == lastSample) {
+						sameLastSample++;
+					} else {
+						sameLastSample = 0;
+					}
+					lastSample = thisSample;
+					Log.d("BCV", "Updating widths - " + sameLastSample);
+					if (sameLastSample == MAX_LAST_SAMPLE) {
+						done = true;
+					}
+				} else if (!finished) {
+					drawn = true;
+				}
+			}
+		});
 		
 		cards.setOrientation(HORIZONTAL);
 		leftCard.setOrientation(VERTICAL);
@@ -66,9 +103,8 @@ public class BattleView extends LinearLayout {
 		cards.addView(rightCard);
 		
 		scroller.addView(cards);
-		hscroller.addView(scroller);
-		
-		this.addView(hscroller);
+	    
+		this.addView(scroller);
 		
 		this.setBackgroundColor(Color.WHITE);
 	}
@@ -89,5 +125,13 @@ public class BattleView extends LinearLayout {
 		
 		leftDescription.setText(actor.getDescription());
 		rightDescription.setText(target.getDescription());
+
+	}
+	
+	public int updateWidths() {
+		leftDescription.setWidth(cards.getWidth() / 2);
+		rightDescription.setWidth(cards.getWidth() / 2);
+		Log.d("BCV", "cardswidth = " + cards.getWidth() + " : leftwidth  = " + leftDescription.getWidth() + " : rightwidth = " + rightDescription.getWidth());
+		return cards.getWidth() + leftDescription.getWidth() + rightDescription.getWidth();
 	}
 }
