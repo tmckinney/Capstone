@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.util.Log;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -117,8 +116,8 @@ public class BattleView extends LinearLayout {
 		leftCard.addView(leftDescription);
 		rightCard.addView(rightDescription);
 		
-		leftImage.setImageResource(CardGame.getImageId(actor.getImageID(), actor.getName()));
-		rightImage.setImageResource(CardGame.getImageId(target.getImageID(), actor.getName()));
+		leftImage.setImageResource(CardGame.getImageId(actor.getImageID()));
+		rightImage.setImageResource(CardGame.getImageId(target.getImageID()));
 		
 		leftName.setText(actor.getName());
 		rightName.setText(target.getName());

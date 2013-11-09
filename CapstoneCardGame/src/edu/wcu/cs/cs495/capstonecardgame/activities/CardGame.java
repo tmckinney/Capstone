@@ -743,7 +743,7 @@ public class CardGame extends Activity {
 	 */
 	private void drawTable() {
 		for (int i = 0; i < NUM_OF_CARDS; i++) {
-			tableCards[i].setImageResource(getImageId(table.getCard(i).getImageID(), table.getCard(i).getName()));
+			tableCards[i].setImageResource(getImageId(table.getCard(i).getImageID()));
 		}
 	}
 
@@ -760,7 +760,7 @@ public class CardGame extends Activity {
 		
 		if (table.getCard(tag) != NullCard.getInstance()) {
 			if (table == myHand) {
-				int imageID = getImageId(myHand.getCard(tag).getImageID(), myHand.getCard(tag).getName());
+				int imageID = getImageId(myHand.getCard(tag).getImageID());
 				Log.d(TAG, "imageID = " + imageID);
 				discard.setImageResource(imageID);
 				discardObject.addCard(myHand.getCard(tag));
@@ -768,7 +768,7 @@ public class CardGame extends Activity {
 				canDraw = true;
 			} else if (table == thisPlayer.getTable()){
 				Table playerTable  = thisPlayer.getTable();
-				discard.setImageResource(getImageId(playerTable.getCard(tag).getImageID(), playerTable.getCard(tag).getName())); 
+				discard.setImageResource(getImageId(playerTable.getCard(tag).getImageID())); 
 				discardObject.addCard(playerTable.getCard(tag));
 				playerTable.setCard(tag, NullCard.getInstance());
 				cardsOnTable--;
@@ -783,7 +783,7 @@ public class CardGame extends Activity {
 	 * @param id The ID of the card 
 	 * @return The drawable id of the Card.
 	 */
-	public static int getImageId(int id, String name) {
+	public static int getImageId(int id) {
 		int imageID;
 		switch (id) {
 		case -1:

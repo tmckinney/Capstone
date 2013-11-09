@@ -1,8 +1,6 @@
 package edu.wcu.cs.cs495.capstonecardgame.activities;
 
 import java.io.IOException;
-import java.util.Date;
-
 import edu.wcu.cs.cs495.capstonecardgame.database.DataBaseHelper;
 import edu.wcu.cs.cs495.capstonecardgame.database.DatabaseInterface;
 import android.app.Activity;
@@ -25,7 +23,7 @@ public class CardGameSplashScreen extends Activity implements DatabaseInterface 
 	        DataBaseHelper myDbHelper = new DataBaseHelper(this);
 	        
 	        Handler handler = new Handler();
-			final Intent i = new Intent(this, CardGameMenu.class);
+			final Intent i = new Intent(this, LoginScreen.class);
 
 	        long startTime = System.currentTimeMillis();
 

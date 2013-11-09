@@ -24,10 +24,7 @@ public class Player {
 	
 	/** The player's health */
 	private int health;
-	
-	/** The player's ID */
-	private int ID;
-	
+
 	/** The player's hand; */
 	private Table hand;
 	
