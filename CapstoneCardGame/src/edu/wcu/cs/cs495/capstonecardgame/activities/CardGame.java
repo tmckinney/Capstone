@@ -969,60 +969,40 @@ public class CardGame extends Activity {
 	public void parseCallCodes(String callCodes) {
 		String command = "";
 		String arg     = "";
-		String[] tokens = callCodes.split("/");
+		String[] tokens = callCodes.split(CallCodes.SEPARATOR);
 		Integer token = 0;
 		while (tokens[token] != null) {
 			command = tokens[token++];
-			arg     = tokens[token++];
-			Log.d(TAG, "command = " + command);
-			Log.d(TAG, "arg     = " + arg);
-			token = executeCommand(command, arg, tokens, token);
+			if (command.equals(CallCodes.ATTACK)) {
+				int attackingPlayer = Integer.parseInt(arg);
+				int attacker = Integer.parseInt(tokens[token++]);
+				int victimPlayer = Integer.parseInt(tokens[token++]);
+				int victimCard = Integer.parseInt(tokens[token++]);
+				Log.d(TAG, "Attack called - " + attackingPlayer + ", " + attacker + ", " + victimPlayer + ", " + victimCard);
+				//attack(attackingPlayer, attacker, victimPlayer, victimCard);
+				Log.d(TAG, "Attack complete");
+			} else if (command.equals(CallCodes.DRAW_CARD)) {
+				int player = Integer.parseInt(arg);
+				Log.d(TAG, "Draw called");
+				drawToPlayer(player);
+			} else if (command.equals(CallCodes.SET_SEED)) {
+				Log.d(TAG, "Set called");
+				setSeed(Long.parseLong(arg));
+			} else if (command.equals(CallCodes.USE)) {
+				useItem(arg);
+			} else if (command.equals(CallCodes.PLAY_CARD)) {
+
+				int player = Integer.parseInt(arg);
+				int cardID = Integer.parseInt(tokens[token++]);
+				int index  = Integer.parseInt(tokens[token++]);
+				Card card = players[player].getHand().getCard(cardID);
+				Log.d(TAG, "Play called: " + card.getName() + " to player " + player);
+				players[player].getTable().setCard(index, card);
+			}
+			drawTable();
 		}
 	}
 
-	/**
-	 * Executes the command parsed by <code>parseCallCodes</code> using the 
-	 * single parsed argument. Parses other arguments as needed.
-	 * 
-	 * @param command The command to execute.
-	 * @param arg     The first argument to the command.
-	 * @param tokens  List of tokens possible containing more arguments.
-	 * @param token   The current index into tokens to use.
-	 */
-	private int executeCommand(String command, 
-								String arg, 
-								String[] tokens, 
-								Integer token) {
-		if (command.equals(CallCodes.ATTACK)) {
-			int attackingPlayer = Integer.parseInt(arg);
-			int attacker = Integer.parseInt(tokens[token++]);
-			int victimPlayer = Integer.parseInt(tokens[token++]);
-			int victimCard = Integer.parseInt(tokens[token++]);
-			Log.d(TAG, "Attack called - " + attackingPlayer + ", " + attacker + ", " + victimPlayer + ", " + victimCard);
-			//attack(attackingPlayer, attacker, victimPlayer, victimCard);
-			Log.d(TAG, "Attack complete");
-		} else if (command.equals(CallCodes.DRAW_CARD)) {
-			int player = Integer.parseInt(arg);
-			Log.d(TAG, "Draw called");
-			drawToPlayer(player);
-		} else if (command.equals(CallCodes.SET_SEED)) {
-			Log.d(TAG, "Set called");
-			setSeed(Long.parseLong(arg));
-		} else if (command.equals(CallCodes.USE)) {
-			useItem(arg);
-		} else if (command.equals(CallCodes.PLAY_CARD)) {
-
-			int player = Integer.parseInt(arg);
-			int cardID = Integer.parseInt(tokens[token++]);
-			int index  = Integer.parseInt(tokens[token++]);
-			Card card = players[player].getHand().getCard(cardID);
-			Log.d(TAG, "Play called: " + card.getName() + " to player " + player);
-			players[player].getTable().setCard(index, card);
-		}
-		drawTable();
-		return token;
-	}
-		
 	private void useItem(String arg) {
 		// TODO Auto-generated method stub
 		

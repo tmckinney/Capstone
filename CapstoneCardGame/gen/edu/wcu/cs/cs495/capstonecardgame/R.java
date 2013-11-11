@@ -47,9 +47,9 @@ public final class R {
         public static final int create_button=0x7f080023;
         public static final int deck=0x7f080012;
         public static final int discard=0x7f080013;
-        public static final int email_address_text_view=0x7f080005;
-        public static final int first_name_text_view=0x7f08000a;
-        public static final int last_name_text_view=0x7f080008;
+        public static final int email_address_text_view=0x7f080007;
+        public static final int first_name_text_view=0x7f080005;
+        public static final int last_name_text_view=0x7f080006;
         public static final int left_layout=0x7f08000b;
         public static final int menu_1=0x7f080015;
         public static final int menu_2=0x7f080016;
@@ -57,8 +57,8 @@ public final class R {
         public static final int menu_4=0x7f080018;
         public static final int menu_settings=0x7f080028;
         public static final int password=0x7f080020;
-        public static final int password_conformation_text_view=0x7f080007;
-        public static final int password_text_view=0x7f080006;
+        public static final int password_conformation_text_view=0x7f080009;
+        public static final int password_text_view=0x7f080008;
         public static final int persistant_check_box=0x7f080022;
         public static final int player_1_radio=0x7f08000d;
         public static final int player_1_radio_1=0x7f08000e;
@@ -76,7 +76,7 @@ public final class R {
         public static final int right_layout=0x7f080014;
         public static final int row1=0x7f08001a;
         public static final int row2=0x7f08001b;
-        public static final int submit_button=0x7f080009;
+        public static final int submit_button=0x7f08000a;
         public static final int sumbit_button=0x7f080021;
         public static final int table=0x7f080019;
         public static final int username=0x7f08001f;
