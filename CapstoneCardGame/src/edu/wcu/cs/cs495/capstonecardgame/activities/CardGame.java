@@ -266,8 +266,19 @@ public class CardGame extends Activity {
 		}
 	}
 	
+	@Override
+	protected void onStart() {
+		// TODO Auto-generated method stub
+		super.onStart();
+	}
 
-	
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		
+	}
+
 	/** Helper method to initialize some of the fields. */
 	private void init(Bundle bundle) {
 		deck = (ImageView) findViewById(R.id.deck);
@@ -967,14 +978,13 @@ public class CardGame extends Activity {
 	 * in the <code>CallCodes</code> class.
 	 */
 	public void parseCallCodes(String callCodes) {
-		String command = "";
-		String arg     = "";
 		String[] tokens = callCodes.split(CallCodes.SEPARATOR);
+		String command;
 		Integer token = 0;
-		while (tokens[token] != null) {
+		while (token < tokens.length) {
 			command = tokens[token++];
 			if (command.equals(CallCodes.ATTACK)) {
-				int attackingPlayer = Integer.parseInt(arg);
+				int attackingPlayer = Integer.parseInt(tokens[token++]);
 				int attacker = Integer.parseInt(tokens[token++]);
 				int victimPlayer = Integer.parseInt(tokens[token++]);
 				int victimCard = Integer.parseInt(tokens[token++]);
@@ -982,17 +992,17 @@ public class CardGame extends Activity {
 				//attack(attackingPlayer, attacker, victimPlayer, victimCard);
 				Log.d(TAG, "Attack complete");
 			} else if (command.equals(CallCodes.DRAW_CARD)) {
-				int player = Integer.parseInt(arg);
+				int player = Integer.parseInt(tokens[token++]);
 				Log.d(TAG, "Draw called");
 				drawToPlayer(player);
 			} else if (command.equals(CallCodes.SET_SEED)) {
 				Log.d(TAG, "Set called");
-				setSeed(Long.parseLong(arg));
+				setSeed(Long.parseLong(tokens[token++]));
 			} else if (command.equals(CallCodes.USE)) {
-				useItem(arg);
+				useItem(tokens[token++]);
 			} else if (command.equals(CallCodes.PLAY_CARD)) {
 
-				int player = Integer.parseInt(arg);
+				int player = Integer.parseInt(tokens[token++]);
 				int cardID = Integer.parseInt(tokens[token++]);
 				int index  = Integer.parseInt(tokens[token++]);
 				Card card = players[player].getHand().getCard(cardID);
@@ -1036,8 +1046,6 @@ public class CardGame extends Activity {
 	}
 	
 	public void viewHealth(View v) {
-		parseCallCodes("SS/1382920215105/DC/1/DC/2/PC/1/0/0/PC/1/0/0/AK/1/0/2/0");
-
 	/*	Log.d(TAG, "viewHealth clicked");
 		promptBuilder = new AlertDialog.Builder(this);
 		
