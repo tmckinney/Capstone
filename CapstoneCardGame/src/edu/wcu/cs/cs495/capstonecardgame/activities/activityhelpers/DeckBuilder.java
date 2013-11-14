@@ -31,14 +31,10 @@ public class DeckBuilder {
         Cursor cur = db.query(DatabaseInterface.ITEM_TRAP_TABLE, null, null, null, null, null, null);
 		cur.moveToFirst();
 		int totalCards = cur.getCount();
-		Log.d("DBH", "Total cards = " + totalCards);
 		cur = db.query(DatabaseInterface.MONSTER_TABLE, null, null, null, null, null, null);
 		cur.moveToFirst();
 		totalCards += cur.getCount();
-		Log.d("DBH", "Total cards = " + totalCards);
 		
-		Log.d(DatabaseInterface.MONSTER_TABLE, "" + cur.getCount());
-
 		deck = new Deck(totalCards, false);
 		
 		while (!cur.isAfterLast()) {
@@ -48,7 +44,6 @@ public class DeckBuilder {
 			int id= cur.getInt(cur.getColumnIndex(DatabaseInterface.M_CARD_ID));
 			String name = cur.getString(cur.getColumnIndex(DatabaseInterface.M_NAME));
 			String description = cur.getString(cur.getColumnIndex(DatabaseInterface.M_DISC));
-			Log.i("DBH", "Building " + name + " id = " + id + "des:\n\"" + description);
 			String type = cur.getString(cur.getColumnIndex(DatabaseInterface.TYPE));
 			int health = cur.getInt(cur.getColumnIndex(DatabaseInterface.HP));
 			int attack = cur.getInt(cur.getColumnIndex(DatabaseInterface.ATTACK_POINTS));
@@ -61,7 +56,6 @@ public class DeckBuilder {
 			
 			cur.moveToNext();
 			
-			Log.d("DBH", "Deck Size : " + deck.getSize());
 		}
 		
 		cur = db.query(DatabaseInterface.ITEM_TRAP_TABLE, null, null, null, null, null, null);
@@ -77,7 +71,6 @@ public class DeckBuilder {
 			int id = cur.getInt(cur.getColumnIndex(DatabaseInterface.I_CARD_ID));
 			String name = cur.getString(cur.getColumnIndex(DatabaseInterface.I_NAME));
 			String description = cur.getString(cur.getColumnIndex(DatabaseInterface.I_DISCRIPTION));
-			Log.i("DBH", "Building " + name + " id = " + id + "des:\n\"" + description);
 			String power = cur.getString(cur.getColumnIndex(DatabaseInterface.EFFECT));
 			boolean oneTimeUse = (cur.getInt(cur.getColumnIndex(DatabaseInterface.ONE_TIME_USE)) == 0 ? true : false);
 			
@@ -85,7 +78,6 @@ public class DeckBuilder {
 			deck.addCard(card);
 			
 			cur.moveToNext();
-			Log.d("DBH", "Deck Size : " + deck.getSize());
 		}
 		
 		myDbHelper.close();

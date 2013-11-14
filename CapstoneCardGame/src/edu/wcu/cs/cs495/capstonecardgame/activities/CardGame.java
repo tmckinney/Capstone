@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -19,6 +20,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
+import android.widget.TextView;
 import edu.wcu.cs.cs495.capstonecardgame.R;
 import edu.wcu.cs.cs495.capstonecardgame.activities.activityhelpers.DeckBuilder;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
@@ -216,12 +218,21 @@ public class CardGame extends Activity {
 					addCardsToTable();
 					drawTable();
 					setClickListeners();
+					loadHistory();
 					drawn = true;
 				}
 			}
 		});
 		
 		init(savedInstanceState);
+	}
+
+	protected void loadHistory() {
+		SharedPreferences prefs = this.getPreferences(MODE_PRIVATE);
+		String history = prefs.getString("HISTORY", "");
+		Log.d(TAG, "History = \"" + history + "\"");
+		if (!history.equals("")) 
+			this.parseCallCodes(history);
 	}
 
 	/**
@@ -255,10 +266,8 @@ public class CardGame extends Activity {
 			card2.setImageResource(R.drawable.ic_launcher);
 			card2.setTag(i + 4);
 			card2.setPadding(PADDING, PADDING, PADDING, PADDING);
-			
-			Log.d(TAG, "adding card " + i);
+
 			tableRow1.addView(card1);
-			Log.d(TAG, "adding card " + (i + 4));
 			tableRow2.addView(card2);
 
 			tableCards[i]                    = card1;
@@ -268,15 +277,19 @@ public class CardGame extends Activity {
 	
 	@Override
 	protected void onStart() {
-		// TODO Auto-generated method stub
 		super.onStart();
 	}
 
 	@Override
 	protected void onStop() {
-		// TODO Auto-generated method stub
 		super.onStop();
-		
+		Log.d(TAG, "Stopping");
+		SharedPreferences.Editor prefsEdit = this.getPreferences(MODE_PRIVATE).edit();
+		String queue = this.networkQueue.toString();
+		Log.d(TAG, "queue = " + queue);
+		prefsEdit.remove("HISTORY");
+		prefsEdit.putString("HISTORY", queue);
+		prefsEdit.commit();
 	}
 
 	/** Helper method to initialize some of the fields. */
@@ -296,7 +309,6 @@ public class CardGame extends Activity {
 		this.players         = new Player[numOfPlayers];
 		this.discardObject   = new Deck(NUM_OF_CARDS, false);
 		this.selectingTarget = false;
-		this.networkQueue    = new NetworkQueue();
 		//TODO Remove after testing
 		this.players[0] = new Player("Tyler");
 		this.players[1] = new Player("Tamara");
@@ -314,22 +326,21 @@ public class CardGame extends Activity {
 
 		deckObject = DeckBuilder.readDeck(deckObject, this);
 		
-		Log.d(TAG, "Deck is " + ((deckObject == null) ? "null" : "not null"));
-		
 		//TODO: Fix after testing.
 		seed = 1382920215105l; //System.currentTimeMillis();
 				
 		deckObject.shuffleDeck(seed);
 		
+		this.networkQueue = new NetworkQueue();
+	
 		networkQueue.add(CallCodes.SET_SEED 
-				         + CallCodes.SEPARATOR + seed
-				         + CallCodes.SEPARATOR);
+			         + CallCodes.SEPARATOR + seed
+			         + CallCodes.SEPARATOR);
 		
 		normalListener = new OnClickListener() {
 
 			@Override
 			public void onClick(View tableCard) {
-				Log.d(TAG, "Clicked card " + tableCard.getTag());
 				cardClicked((ImageView) tableCard);
 			}
 		};
@@ -369,7 +380,6 @@ public class CardGame extends Activity {
 						card = NullCard.getInstance();
 					}
 					
-					Log.d(TAG, "Drew a " + card.getName());
 					card.setOwner(playerID);
 					thisPlayer.addToHand(card);
 					drawTable();
@@ -406,8 +416,6 @@ public class CardGame extends Activity {
 				viewChanged();
 				RadioButton rb =
 						(RadioButton) findViewById(checkedId);
-				Log.d(TAG,
-						"Player view changed to " + rb.getText() + "; with tag " + rb.getTag());
 				int tag = Integer.parseInt((String) rb.getTag());
 				table = players[tag].getTable();
 				drawTable();
@@ -703,7 +711,6 @@ public class CardGame extends Activity {
 	 */
 	private void playCard(View viewCard) {
 		final int handIndex = (Integer) viewCard.getTag();
-		Log.d(TAG, "playing card : " + handIndex);
 		final Card handCard  = myHand.getCard(handIndex);
 		table = thisPlayer.getTable();
 		playerRadios.check(R.id.player_1_radio);
@@ -714,10 +721,8 @@ public class CardGame extends Activity {
 				@Override
 				public void onClick(View tableCard) {
 					int tag = (Integer) tableCard.getTag();
-					Log.d(TAG, "clicked card : " + tag);
 					if (table.getCard(tag) == NullCard.getInstance()
 							&& table == thisPlayer.getTable()) {
-						Log.d(TAG,"Seting card " + tag + " to " + handCard.getName());
 						networkQueue.add(CallCodes.PLAY_CARD 
 										 + CallCodes.SEPARATOR + playerID 
 										 + CallCodes.SEPARATOR + handCard.getImageID() 
@@ -725,11 +730,8 @@ public class CardGame extends Activity {
 										 + CallCodes.SEPARATOR);
 						thisPlayer.getTable().setCard(tag, handCard);
 						cardsOnTable++;
-						Log.d(TAG, "Done");
 						drawTable();
-						Log.d(TAG, "removeing card");
 						removeCard(playerID, handIndex);
-						Log.d(TAG, "done");
 						table = myHand;
 						drawTable();
 						if (cardsOnTable == NUM_OF_CARDS) {
@@ -772,7 +774,6 @@ public class CardGame extends Activity {
 		if (table.getCard(tag) != NullCard.getInstance()) {
 			if (table == myHand) {
 				int imageID = getImageId(myHand.getCard(tag).getImageID());
-				Log.d(TAG, "imageID = " + imageID);
 				discard.setImageResource(imageID);
 				discardObject.addCard(myHand.getCard(tag));
 				removeCard(playerID, tag);
@@ -865,7 +866,6 @@ public class CardGame extends Activity {
 	 */
 	public void viewHand(View v) {
 		viewChanged();
-		Log.d(TAG, "view hand");
 		playerRadios.check(R.id.player_1_radio);
 		table = myHand;
 		drawTable();
@@ -878,7 +878,6 @@ public class CardGame extends Activity {
 	 */
 	public void viewTable(View v) {
 		viewChanged();
-		Log.d(TAG, "view table");
 		table = thisPlayer.getTable();
 		drawTable();
 	}
@@ -988,15 +987,11 @@ public class CardGame extends Activity {
 				int attacker = Integer.parseInt(tokens[token++]);
 				int victimPlayer = Integer.parseInt(tokens[token++]);
 				int victimCard = Integer.parseInt(tokens[token++]);
-				Log.d(TAG, "Attack called - " + attackingPlayer + ", " + attacker + ", " + victimPlayer + ", " + victimCard);
-				//attack(attackingPlayer, attacker, victimPlayer, victimCard);
-				Log.d(TAG, "Attack complete");
+				attack(attackingPlayer, attacker, victimPlayer, victimCard);
 			} else if (command.equals(CallCodes.DRAW_CARD)) {
 				int player = Integer.parseInt(tokens[token++]);
-				Log.d(TAG, "Draw called");
 				drawToPlayer(player);
 			} else if (command.equals(CallCodes.SET_SEED)) {
-				Log.d(TAG, "Set called");
 				setSeed(Long.parseLong(tokens[token++]));
 			} else if (command.equals(CallCodes.USE)) {
 				useItem(tokens[token++]);
@@ -1006,7 +1001,6 @@ public class CardGame extends Activity {
 				int cardID = Integer.parseInt(tokens[token++]);
 				int index  = Integer.parseInt(tokens[token++]);
 				Card card = players[player].getHand().getCard(cardID);
-				Log.d(TAG, "Play called: " + card.getName() + " to player " + player);
 				players[player].getTable().setCard(index, card);
 			}
 			drawTable();
@@ -1015,7 +1009,6 @@ public class CardGame extends Activity {
 
 	private void useItem(String arg) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	/**
@@ -1025,11 +1018,9 @@ public class CardGame extends Activity {
 	 */
 	private void drawToPlayer(int player) {
 		Card card = deckObject.drawCard();
-		Log.d(TAG, "Card name: " + card.getName());
 		players[player].addToHand(card);
 	}
 
-	@SuppressWarnings("unused")
 	private void attack(int attackingPlayerID, 
 						int attackerCardID, 
 						int victimPlayerID, 
@@ -1046,7 +1037,6 @@ public class CardGame extends Activity {
 	}
 	
 	public void viewHealth(View v) {
-	/*	Log.d(TAG, "viewHealth clicked");
 		promptBuilder = new AlertDialog.Builder(this);
 		
 		promptBuilder.setTitle("Player Health");
@@ -1062,7 +1052,6 @@ public class CardGame extends Activity {
 		promptBuilder.setView(tv);
 		
 		prompt = promptBuilder.create();
-		prompt.show();*/
-		
+		prompt.show();
 	}
 }

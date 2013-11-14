@@ -1,7 +1,5 @@
 package edu.wcu.cs.cs495.capstonecardgame.cardgamestructure;
 
-import android.util.Log;
-
 import edu.wcu.cs.cs495.capstonecardgame.activities.CardGame;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.NullCard;
@@ -52,7 +50,6 @@ public class Table {
 	*  @param card  The <code>Card</code> to be set at the index.
 	*/ 	
 	public void setCard(int index, Card card) {
-		Log.d(CardGame.TAG, "index" + index);
 		cards[index] = card;
 	}
 }

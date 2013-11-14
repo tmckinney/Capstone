@@ -27,6 +27,16 @@ public class NetworkQueue implements Queue<String> {
 		this(10);
 	}
 	
+	public NetworkQueue(String string) {
+		String[] strings = string.split(CallCodes.SEPARATOR);
+		array = new String[strings.length * 4];
+		for (String aString : strings) {
+			this.add(aString);
+			this.add(CallCodes.SEPARATOR);
+		}
+		Log.d(TAG, this.toString());
+	}
+	
 	@Override
 	public boolean addAll(Collection<? extends String> arg0) {
 		// TODO Auto-generated method stub
@@ -67,8 +77,6 @@ public class NetworkQueue implements Queue<String> {
 		}
 		size++;
 		index++;
-		Log.i(TAG, "queue: " + queueToString());
-		Log.i(TAG, "pushed = " + pushed);
 		return pushed;
 	}
 
@@ -89,11 +97,12 @@ public class NetworkQueue implements Queue<String> {
 	}
 
 	private void pushToNetwork() {
-		String queue = queueToString();
+		String queue = this.toString();
 		Log.i(TAG, queue);
 	}
 
-	private String queueToString() {
+	@Override
+	public String toString() {
 		for (int i = 0; i < size; i++) {
 			queue += remove();
 		}

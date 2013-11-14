@@ -32,6 +32,13 @@ public class LoginScreen extends Activity {
 		usernameTextView = (TextView) findViewById(R.id.username);
 		passwordTextView = (TextView) findViewById(R.id.password);
 		persistantLogin  = (CheckBox) findViewById(R.id.persistant_check_box);
+		
+		/*SharedPreferences prefs = this.getPreferences(MODE_PRIVATE);
+		if (prefs.getBoolean("persistant", false)) {
+			usernameTextView.setText(prefs.getString("username", ""));
+			passwordTextView.setText(this.dencrypt(prefs.getString("password", "")));
+			this.submit_clicked(null);
+		}*/
 	}
 
 	@Override
@@ -47,6 +54,11 @@ public class LoginScreen extends Activity {
 	}
 	
 	private String encrypt(String text) {
+		//TODO: Do stuff to text
+		return text;
+	}
+	
+	private String dencrypt(String text) {
 		//TODO: Do stuff to text
 		return text;
 	}
@@ -68,6 +80,7 @@ public class LoginScreen extends Activity {
 				editor.putString("password",  password);
 				editor.putBoolean("persistant", persistantLogin.isChecked());
 				editor.commit();
+				Toast.makeText(this, "Logged in as " + username, Toast.LENGTH_SHORT);
 				Intent i = new Intent(this, CardGameMenu.class);
 				this.startActivity(i);
 			} else {

@@ -2,8 +2,6 @@ package edu.wcu.cs.cs495.capstonecardgame.cardgamestructure;
 
 import java.util.Random;
 
-import android.util.Log;
-import edu.wcu.cs.cs495.capstonecardgame.activities.CardGame;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.NullCard;
 
@@ -17,8 +15,6 @@ import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.NullCard;
 public class Deck {
 
 	private static final int DEFAULT_DECK_SIZE = 50;
-
-	private static final String TAG = "Deck: ";
 
 	/** Array of cards in the deck. */
 	private Card[] cards;
@@ -46,7 +42,6 @@ public class Deck {
     /** Constructor to initialize a default <code>Deck</code>. */
 	public Deck() {
 		this(DEFAULT_DECK_SIZE, true);
-		Log.d(CardGame.TAG, "" + cards.length);
 	}
 	
     public Deck(int num) {
@@ -61,19 +56,15 @@ public class Deck {
      */
 	public Card drawCard() {
 		Card card;
-		Log.d(TAG, "top = " + top);
 		if (top > 0) {
 			card = cards[top];
 			top--;
-			Log.d(TAG, "Cards remaining: " + (top + 1));
 		} else if (top == 0) {
 			isEmpty = true;
 			card = cards[top];
 			top--;
-			Log.d(TAG, "Out of Cards");
 		} else {
 			card = NullCard.getInstance();
-			Log.d(TAG, "Out of Cards");
 		}
 		return card;
 	}
@@ -83,7 +74,6 @@ public class Deck {
 		if (!isFull) {
 			cards[top] = card;
 			top++;
-			Log.d(TAG, "Adding card " + card.getName() + ", cards in deck " + top);
 		}
 		if (top == cards.length) {
 			top--;
@@ -93,7 +83,6 @@ public class Deck {
 
     /** Shuffles the deck using a Fisher-Yates shuffling algorithm. */
 	public void shuffleDeck(long seed) {
-		Log.d(TAG, "Seed is " + seed);
 		Random random = new Random(seed);
 		int j;
 		for (int i = cards.length - 1; i >= 1; i--) {

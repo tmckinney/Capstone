@@ -11,7 +11,6 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public class DataBaseHelper extends SQLiteOpenHelper {
 
@@ -48,7 +47,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 		boolean dbExist = checkDataBase();
 
 		if (dbExist) {
-			Log.d("THIS THING --->", " exists");
 			// By calling this method here onUpgrade will be called on a
 			// writeable database,
 			// but only if the version number has been bumped

@@ -7,70 +7,66 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 
 public class CardGameSplashScreen extends Activity implements DatabaseInterface {
-	
-	private static final String TAG = null;
+
 	public final int MAX_DELAY = 3000;
-	
-	 @Override
-	    protected void onCreate(Bundle savedInstanceState) {
-	        super.onCreate(savedInstanceState);
-	        setContentView(edu.wcu.cs.cs495.capstonecardgame.R.layout.splash_screen_layout);
-	        
-	        DataBaseHelper myDbHelper = new DataBaseHelper(this);
-	        
-	        Handler handler = new Handler();
-			final Intent i = new Intent(this, LoginScreen.class);
 
-	        long startTime = System.currentTimeMillis();
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(edu.wcu.cs.cs495.capstonecardgame.R.layout.splash_screen_layout);
 
-	        try {
+		DataBaseHelper myDbHelper = new DataBaseHelper(this);
 
-	        	myDbHelper.createDataBase();
+		Handler handler = new Handler();
+		final Intent i = new Intent(this, LoginScreen.class);
 
-	        } catch (IOException ioe) {
+		long startTime = System.currentTimeMillis();
 
-	        	throw new Error("Unable to create database");
+		try {
 
-	        }
-	        
-	        myDbHelper.close();
-	        
-	        long time = System.currentTimeMillis() - startTime;
-	        long delayMillis;
-	        Log.d(TAG, "time = " + time);
-	        if (time < MAX_DELAY) {
-	        	delayMillis = MAX_DELAY - time;
-	        } else {
-	        	delayMillis = 0;
-	        }
-	        Log.d(TAG, "delay = " + delayMillis);
-	        handler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					startActivity(i);
-					finish();
-				}	        	
-	        }, delayMillis);
-	    }
-	    
-	    /**
-	     * Not implemented yet.  Will hold options. such as change options ect.
-	     */
-	    @Override
-	    public boolean onCreateOptionsMenu(Menu menu) {
-	        // Inflate the menu; this adds items to the action bar if it is present.
-	        //getMenuInflater().inflate(R.menu.main, menu);
-	        return true;
-	    }
+			myDbHelper.createDataBase();
 
-	    
-	    @Override
-	    public void onStop() {
-	    	super.onStop();
-	    	
-	    }
+		} catch (IOException ioe) {
+
+			throw new Error("Unable to create database");
+
+		}
+
+		myDbHelper.close();
+
+		long time = System.currentTimeMillis() - startTime;
+		long delayMillis;
+		if (time < MAX_DELAY) {
+			delayMillis = MAX_DELAY - time;
+		} else {
+			delayMillis = 0;
+		}
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				startActivity(i);
+				finish();
+			}	        	
+		}, delayMillis);
+	}
+
+	/**
+	 * Not implemented yet.  Will hold options. such as change options ect.
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		//getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+
+	@Override
+	public void onStop() {
+		super.onStop();
+
+	}
 }
