@@ -58,6 +58,7 @@ public class LoginScreen extends Activity {
 		return text;
 	}
 	
+	@SuppressWarnings("unused")
 	private String dencrypt(String text) {
 		//TODO: Do stuff to text
 		return text;

@@ -7,4 +7,5 @@ public class CallCodes {
 	public static final String DRAW_CARD = "DC";
 	public static final String ATTACK    = "AK";
 	public static final String USE       = "US";
+	public static final String RM_CARD   = "RC";
 }

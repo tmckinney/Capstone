@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -51,6 +50,8 @@ public class CardGame extends Activity {
 	/** Debugging Tag. **/
 	public static final String TAG = "Card Game";
 
+	public static final String HISTORY = "HISTORY";
+	
 	/** The number of cards possible on the table **/
 	public static final int NUM_OF_CARDS = 8;
 	
@@ -69,7 +70,7 @@ public class CardGame extends Activity {
 	 */
 	private static final int CARD_HIEGHT_DIVDER = 2;
 
-	public static final long PROMPT_DELAY = 0001;
+	public static final long PROMPT_DELAY = 3000;
 
 	/** The number of players in the current game. */
 	private int numOfPlayers;
@@ -180,6 +181,8 @@ public class CardGame extends Activity {
 	private Player thisPlayer;
 	
 	private Table myHand;
+	
+	private String history;
 
 	/** 
 	 * Specifies the behavior of the <code>Activity</code> as soon as it is
@@ -203,7 +206,9 @@ public class CardGame extends Activity {
 		canUse = true;
 
 		ViewTreeObserver tableObserver = tableLayout.getViewTreeObserver();
-
+		
+		final Bundle finalSavedState = savedInstanceState;
+		
 		tableObserver.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 
 			@Override
@@ -218,7 +223,7 @@ public class CardGame extends Activity {
 					addCardsToTable();
 					drawTable();
 					setClickListeners();
-					loadHistory();
+					loadHistory(finalSavedState);
 					drawn = true;
 				}
 			}
@@ -227,12 +232,13 @@ public class CardGame extends Activity {
 		init(savedInstanceState);
 	}
 
-	protected void loadHistory() {
-		SharedPreferences prefs = this.getPreferences(MODE_PRIVATE);
-		String history = prefs.getString("HISTORY", "");
-		Log.d(TAG, "History = \"" + history + "\"");
-		if (!history.equals("")) 
-			this.parseCallCodes(history);
+	protected void loadHistory(Bundle savedInstanceState) {
+		if (savedInstanceState != null) {
+			history = savedInstanceState.getString(HISTORY);
+			Log.d(TAG, "History = \"" + history + "\"");
+			if (!history.equals("")) 
+				this.parseCallCodes(history);
+		}
 	}
 
 	/**
@@ -283,13 +289,13 @@ public class CardGame extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		Log.d(TAG, "Stopping");
-		SharedPreferences.Editor prefsEdit = this.getPreferences(MODE_PRIVATE).edit();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
 		String queue = this.networkQueue.toString();
-		Log.d(TAG, "queue = " + queue);
-		prefsEdit.remove("HISTORY");
-		prefsEdit.putString("HISTORY", queue);
-		prefsEdit.commit();
+		outState.putString(HISTORY, history + queue);
 	}
 
 	/** Helper method to initialize some of the fields. */
@@ -326,9 +332,7 @@ public class CardGame extends Activity {
 
 		deckObject = DeckBuilder.readDeck(deckObject, this);
 		
-		//TODO: Fix after testing.
-		seed = 1382920215105l; //System.currentTimeMillis();
-				
+		this.setSeed(System.currentTimeMillis());
 		deckObject.shuffleDeck(seed);
 		
 		this.networkQueue = new NetworkQueue();
@@ -348,6 +352,8 @@ public class CardGame extends Activity {
 		health.setText("" + thisPlayer.getHealth());
 		
 		handler = ActionHandler.getInstance();
+		
+		this.history = "";
 	}
 
 	/** Helper method to set <code>OnClickListener</code>s to each GUI element. */
@@ -732,6 +738,10 @@ public class CardGame extends Activity {
 						cardsOnTable++;
 						drawTable();
 						removeCard(playerID, handIndex);
+						networkQueue.add(CallCodes.RM_CARD
+										 + CallCodes.SEPARATOR + playerID
+										 + CallCodes.SEPARATOR + handIndex
+										 + CallCodes.SEPARATOR);
 						table = myHand;
 						drawTable();
 						if (cardsOnTable == NUM_OF_CARDS) {
@@ -966,8 +976,6 @@ public class CardGame extends Activity {
 	 */
 	public void setSeed(long seed) {
 		this.seed = seed;
-		//TODO Remove after testing
-		seed = Long.parseLong("1381629156316");
 	}
 	
 	/**
@@ -996,12 +1004,15 @@ public class CardGame extends Activity {
 			} else if (command.equals(CallCodes.USE)) {
 				useItem(tokens[token++]);
 			} else if (command.equals(CallCodes.PLAY_CARD)) {
-
 				int player = Integer.parseInt(tokens[token++]);
 				int cardID = Integer.parseInt(tokens[token++]);
 				int index  = Integer.parseInt(tokens[token++]);
 				Card card = players[player].getHand().getCard(cardID);
 				players[player].getTable().setCard(index, card);
+			} else if (command.equals(CallCodes.RM_CARD)) {
+				int player    = Integer.parseInt(tokens[token++]);
+				int handIndex = Integer.parseInt(tokens[token++]);
+				removeCard(player, handIndex);
 			}
 			drawTable();
 		}
