@@ -109,7 +109,7 @@ public class BattleView extends LinearLayout {
 	}
 
 	public void setAll(Card actor, Card target) {
-		
+
 		leftCard.addView(BattleCardViewBuilder.getView(context, actor));
 		rightCard.addView(BattleCardViewBuilder.getView(context, target));
 		
@@ -130,7 +130,6 @@ public class BattleView extends LinearLayout {
 	public int updateWidths() {
 		leftDescription.setWidth(cards.getWidth() / 2);
 		rightDescription.setWidth(cards.getWidth() / 2);
-		Log.d("BCV", "cardswidth = " + cards.getWidth() + " : leftwidth  = " + leftDescription.getWidth() + " : rightwidth = " + rightDescription.getWidth());
 		return cards.getWidth() + leftDescription.getWidth() + rightDescription.getWidth();
 	}
 }

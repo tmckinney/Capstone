@@ -12,10 +12,11 @@ import edu.wcu.cs.cs495.capstonecardgame.database.DataBaseHelper;
 import edu.wcu.cs.cs495.capstonecardgame.database.DatabaseInterface;
 
 public class DeckBuilder {
-	public static Deck readDeck(Deck deck, Context context) {
+	public static Deck readDeck(Context context) {
 		   
         SQLiteDatabase db = null;
         DataBaseHelper myDbHelper = new DataBaseHelper(context);
+        Deck deck;
         
         try {
         	
@@ -81,7 +82,6 @@ public class DeckBuilder {
 		}
 		
 		myDbHelper.close();
-		
 		return deck;
 	}
 }

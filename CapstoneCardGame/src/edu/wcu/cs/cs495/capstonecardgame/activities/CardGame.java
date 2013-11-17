@@ -21,12 +21,12 @@ import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 import edu.wcu.cs.cs495.capstonecardgame.R;
+import edu.wcu.cs.cs495.capstonecardgame.activities.activityhelpers.ActionHandler;
 import edu.wcu.cs.cs495.capstonecardgame.activities.activityhelpers.DeckBuilder;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.ItemCard;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.MonsterCard;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.NullCard;
-import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.ActionHandler;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Deck;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Player;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Table;
@@ -229,7 +229,8 @@ public class CardGame extends Activity {
 			}
 		});
 		
-		init(savedInstanceState);
+		Bundle extras = this.getIntent().getExtras();
+		init(extras);
 	}
 
 	protected void loadHistory(Bundle savedInstanceState) {
@@ -305,8 +306,13 @@ public class CardGame extends Activity {
 		deck.setImageResource(R.drawable.ic_launcher);
 		discard.setImageResource(R.drawable.nc);
 		health = (Button) findViewById(R.id.menu_1);
-
-
+		
+		this.networkQueue = new NetworkQueue();
+		
+		if (bundle.containsKey("SEED")) {
+			this.initDeck(bundle.getLong("SEED"));
+		}
+		
 		this.numOfPlayers    = 4;
 		this.canDraw         = true;
 		this.canPlay         = true;
@@ -329,17 +335,6 @@ public class CardGame extends Activity {
 		this.myHand        = thisPlayer.getHand();
 		
 		this.table    = myHand;
-
-		deckObject = DeckBuilder.readDeck(deckObject, this);
-		
-		this.setSeed(System.currentTimeMillis());
-		deckObject.shuffleDeck(seed);
-		
-		this.networkQueue = new NetworkQueue();
-	
-		networkQueue.add(CallCodes.SET_SEED 
-			         + CallCodes.SEPARATOR + seed
-			         + CallCodes.SEPARATOR);
 		
 		normalListener = new OnClickListener() {
 
@@ -406,6 +401,17 @@ public class CardGame extends Activity {
 				Log.d(TAG, "Discarded a card.");
 			}
 		});
+	}
+	
+	/** Initiates the deck objects and shuffles the cards. */
+	public void initDeck(long seed) {
+		Log.d(TAG, "Initing Deck");
+		this.setSeed(seed);
+		networkQueue.add(CallCodes.SET_SEED 
+			         + CallCodes.SEPARATOR + seed
+			         + CallCodes.SEPARATOR);
+		deckObject = DeckBuilder.readDeck(this);
+		deckObject.shuffleDeck(seed);
 	}
 	
 	/** 
@@ -731,7 +737,7 @@ public class CardGame extends Activity {
 							&& table == thisPlayer.getTable()) {
 						networkQueue.add(CallCodes.PLAY_CARD 
 										 + CallCodes.SEPARATOR + playerID 
-										 + CallCodes.SEPARATOR + handCard.getImageID() 
+										 + CallCodes.SEPARATOR + handIndex
 										 + CallCodes.SEPARATOR + tag
 										 + CallCodes.SEPARATOR);
 						thisPlayer.getTable().setCard(tag, handCard);
