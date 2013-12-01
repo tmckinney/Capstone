@@ -30,8 +30,8 @@ import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.NullCard;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Deck;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Player;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Table;
-import edu.wcu.cs.cs495.capstonecardgame.server.CallCodes;
-import edu.wcu.cs.cs495.capstonecardgame.server.NetworkQueue;
+import edu.wcu.cs.cs495.capstonecardgame.network.CallCodes;
+import edu.wcu.cs.cs495.capstonecardgame.network.NetworkQueue;
 import edu.wcu.cs.cs495.capstonecardgame.views.BattleView;
 import edu.wcu.cs.cs495.capstonecardgame.views.PopUpCardView;
 import edu.wcu.cs.cs495.capstonecardgame.views.PopUpItemCardView;
@@ -184,6 +184,10 @@ public class CardGame extends Activity {
 	
 	private String history;
 
+	private int gameNum;
+
+	private int turnNumber;
+
 	/** 
 	 * Specifies the behavior of the <code>Activity</code> as soon as it is
 	 * created.
@@ -307,10 +311,13 @@ public class CardGame extends Activity {
 		discard.setImageResource(R.drawable.nc);
 		health = (Button) findViewById(R.id.menu_1);
 		
-		this.networkQueue = new NetworkQueue();
+		this.networkQueue = new NetworkQueue(this.gameNum);
 		
 		if (bundle.containsKey("SEED")) {
 			this.initDeck(bundle.getLong("SEED"));
+		} 
+		if (bundle.containsKey("GAME")) {
+			this.gameNum = bundle.getInt("GAME");
 		}
 		
 		this.numOfPlayers    = 4;
@@ -872,6 +879,8 @@ public class CardGame extends Activity {
 	 * @param v The view that trigger the event.
 	 */
 	public void pass(View v) {
+		this.turnNumber++;
+		networkQueue.pushToNetwork(turnNumber);
 		Log.d(TAG, "pass");
 	}
 
@@ -1070,5 +1079,14 @@ public class CardGame extends Activity {
 		
 		prompt = promptBuilder.create();
 		prompt.show();
+	}
+	
+
+	public int getGameNum() {
+		return gameNum;
+	}
+
+	public void setGameNum(int gameNum) {
+		this.gameNum = gameNum;
 	}
 }

@@ -1,9 +1,12 @@
 package edu.wcu.cs.cs495.capstonecardgame.activities;
 
+import java.io.IOException;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.CheckBox;
@@ -11,8 +14,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import edu.wcu.cs.cs495.capstonecardgame.R;
+import edu.wcu.cs.cs495.capstonecardgame.network.CardGameClient;
 
 public class LoginScreen extends Activity {
+
+	private static final Object GOOD = "good";
 
 	/** TextView for the user to enter their username. */
 	private TextView usernameTextView;
@@ -49,8 +55,27 @@ public class LoginScreen extends Activity {
 	}
 	
 	private boolean validateLogin(String username, String password) {
-		//TODO: Validate the login.
-		return true;
+		Log.d("LOGIN", "Validating...");
+		CardGameClient client = null;
+		try {
+			client = new CardGameClient();
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Log.d("LOGIN", "Validating......");
+		String result = client.verifyUser(username, password);
+		Log.d("LOGIN", "Password is " + result);
+		if (result.equals(GOOD))
+			return true;
+		else
+			return false;
 	}
 	
 	private String encrypt(String text) {

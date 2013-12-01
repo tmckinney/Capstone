@@ -1,4 +1,4 @@
-package edu.wcu.cs.cs495.capstonecardgame.server;
+package edu.wcu.cs.cs495.capstonecardgame.network;
 
 public class CallCodes {
 	public static final String SEPARATOR = "/";

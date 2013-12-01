@@ -4,7 +4,7 @@ import android.util.Log;
 import edu.wcu.cs.cs495.capstonecardgame.activities.CardGame;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.Card;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.cards.MonsterCard;
-import edu.wcu.cs.cs495.capstonecardgame.server.CallCodes;
+import edu.wcu.cs.cs495.capstonecardgame.network.CallCodes;
 
 public class ActionHandler {
 	
