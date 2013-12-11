@@ -1,6 +1,8 @@
 //23456789//23456789//23456789//23456789//23456789//23456789//23456789//23456789
 package edu.wcu.cs.cs495.capstonecardgame.activities;
 
+import java.io.IOException;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
@@ -31,6 +33,7 @@ import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Deck;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Player;
 import edu.wcu.cs.cs495.capstonecardgame.cardgamestructure.Table;
 import edu.wcu.cs.cs495.capstonecardgame.network.CallCodes;
+import edu.wcu.cs.cs495.capstonecardgame.network.CardGameClient;
 import edu.wcu.cs.cs495.capstonecardgame.network.NetworkQueue;
 import edu.wcu.cs.cs495.capstonecardgame.views.BattleView;
 import edu.wcu.cs.cs495.capstonecardgame.views.PopUpCardView;
@@ -188,6 +191,12 @@ public class CardGame extends Activity {
 
 	private int turnNumber;
 
+	private int activatedSlot;
+
+	private int targetSlot;
+
+	private boolean pushing;
+
 	/** 
 	 * Specifies the behavior of the <code>Activity</code> as soon as it is
 	 * created.
@@ -310,15 +319,20 @@ public class CardGame extends Activity {
 		deck.setImageResource(R.drawable.ic_launcher);
 		discard.setImageResource(R.drawable.nc);
 		health = (Button) findViewById(R.id.menu_1);
+	
+		if (bundle.containsKey("GAME")) {
+			this.gameNum = bundle.getInt("GAME");
+		}
 		
-		this.networkQueue = new NetworkQueue(this.gameNum);
+		//TODO Remove after testing		
+		this.playerID     = 2;
+		this.networkQueue = new NetworkQueue(this.playerID, this.gameNum);
 		
 		if (bundle.containsKey("SEED")) {
 			this.initDeck(bundle.getLong("SEED"));
 		} 
-		if (bundle.containsKey("GAME")) {
-			this.gameNum = bundle.getInt("GAME");
-		}
+
+	
 		
 		this.numOfPlayers    = 4;
 		this.canDraw         = true;
@@ -334,7 +348,7 @@ public class CardGame extends Activity {
 		this.players[2] = new Player("Jae");
 		this.players[3] = new Player("Michael");
 		
-		this.playerID   = 0;
+
 		//TODO End testing 
 		
 //		this.currentPlayer = players[0];
@@ -535,6 +549,7 @@ public class CardGame extends Activity {
 	/** Helper method displaying a choice dialog when a card on the player's table is clicked. */
 	private void clickedTableCard(ImageView tableCard) {
 		final View card = tableCard;
+		final int slot = (Integer)tableCard.getTag();
 		
 		if (promptBuilder == null)
 			promptBuilder = new AlertDialog.Builder(this);
@@ -594,7 +609,7 @@ public class CardGame extends Activity {
 
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					activate(table.getCard((Integer) card.getTag()));
+					activate(table.getCard(slot), slot);
 				}
 
 			});
@@ -608,9 +623,10 @@ public class CardGame extends Activity {
 	 * Allow's the player to select a target card.
 	 * @param card The attacking or activated card selected.
 	 */
-	protected void activate(Card card) {
+	protected void activate(Card card, int slot) {
 		selectingTarget = true;
 		activatedCard   = card;
+		activatedSlot   = slot;
 	}
 
 	/** 
@@ -622,7 +638,8 @@ public class CardGame extends Activity {
 		
 		//final View card = tableCard;
 		cardSelected = false;
-		final Card card = table.getCard((Integer) tableCard.getTag());
+		final int slot = (Integer) tableCard.getTag();
+		final Card card = table.getCard(slot);
 		
 		if (!card.canBeUsed()) {
 			card.toast(this);
@@ -652,6 +669,7 @@ public class CardGame extends Activity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				targetSlot = slot;
 				cardSelected(card);
 				selectingTarget = false;
 			}
@@ -688,7 +706,7 @@ public class CardGame extends Activity {
 		
 		if (card.canBeUsed()) {
 			card.toast(this);
-			handler.setup(activatedCard, targetCard);
+			handler.setup(activatedCard, targetCard, activatedSlot, targetSlot);
 			handler.simulate(this);
 			showResult();
 		}
@@ -842,6 +860,15 @@ public class CardGame extends Activity {
 		case 5:
 			imageID = R.drawable.gp;
 			break;
+		case 6:
+			imageID = R.drawable.levereggofdoom;
+			break;
+		case 7:
+			imageID = R.drawable.scarecrow;
+			break;
+		case 8:
+			imageID = R.drawable.snakestick;
+			break;
 		case 101:
 		case 103:
 			imageID = R.drawable.hp;
@@ -851,6 +878,24 @@ public class CardGame extends Activity {
 			break;
 		case 104:
 			imageID = R.drawable.bitter_bomb;
+			break;
+		case 105:
+			imageID = R.drawable.ancientscrolls;
+			break;
+		case 106:
+			imageID = R.drawable.doubleaxeofdeath;
+			break;
+		case 107:
+			imageID = R.drawable.oldbook;
+			break;
+		case 108:
+			imageID = R.drawable.shadowofsword;
+			break;
+		case 109:
+			imageID = R.drawable.skullfan;
+			break;
+		case 110:
+			imageID = R.drawable.staffofeyes;
 			break;
 		default:
 			imageID = R.drawable.error;
@@ -879,9 +924,10 @@ public class CardGame extends Activity {
 	 * @param v The view that trigger the event.
 	 */
 	public void pass(View v) {
-		this.turnNumber++;
-		networkQueue.pushToNetwork(turnNumber);
-		Log.d(TAG, "pass");
+			this.turnNumber++;
+			networkQueue.pushToNetwork(turnNumber);
+			Log.d(TAG, "pass");
+			pushing = false;
 	}
 
 	/**
@@ -1053,7 +1099,7 @@ public class CardGame extends Activity {
 						int victimCardID) {
 		Card actor  = players[attackingPlayerID].getTable().getCard(attackerCardID);
 		Card victim = players[victimPlayerID].getTable().getCard(victimCardID);
-		handler.setup(actor, victim);
+		handler.setup(actor, victim, activatedSlot, targetSlot);
 		handler.simulate(this);
 		showResult();
 	}
@@ -1063,22 +1109,41 @@ public class CardGame extends Activity {
 	}
 	
 	public void viewHealth(View v) {
-		promptBuilder = new AlertDialog.Builder(this);
-		
-		promptBuilder.setTitle("Player Health");
-		
-		StringBuilder sb = new StringBuilder();
-		
-		for (int i = 0; i < numOfPlayers; i++) {
-			sb.append(players[i].getName() + " " + players[i].getHealth() + "\n");
+		this.turnNumber++;
+		CardGameClient client;
+		try {
+			client = new CardGameClient();
+			String turn = client.pull("" + this.gameNum, "2");
+			Log.d(TAG, "turn = " + turn);
+			parseCallCodes(turn);
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		pushing = true;
 		
-		TextView tv = new TextView(this);
-		tv.setText(sb.toString());
-		promptBuilder.setView(tv);
-		
-		prompt = promptBuilder.create();
-		prompt.show();
+//		promptBuilder = new AlertDialog.Builder(this);
+//		
+//		promptBuilder.setTitle("Player Health");
+//		
+//		StringBuilder sb = new StringBuilder();
+//		
+//		for (int i = 0; i < numOfPlayers; i++) {
+//			sb.append(players[i].getName() + " " + players[i].getHealth() + "\n");
+//		}
+//		
+//		TextView tv = new TextView(this);
+//		tv.setText(sb.toString());
+//		promptBuilder.setView(tv);
+//		
+//		prompt = promptBuilder.create();
+//		prompt.show();
 	}
 	
 

@@ -13,6 +13,8 @@ public class ActionHandler {
 	private Card actor;
 	private Card victim;
 	private String result;
+	private int actorSlot;
+	private int victimSlot;
 	
     /** 
      * Method to retrieve the Singleton. If it has not been created, i.e.
@@ -27,10 +29,12 @@ public class ActionHandler {
 		return instance;
 	}
 	
-	public void setup(Card actor, Card victim) {
-		this.actor = actor;
-		this.victim = victim;
-		result = "";
+	public void setup(Card actor, Card victim, int actorSlot, int victimSlot) {
+		this.actor      = actor;
+		this.victim     = victim;
+		this.actorSlot  = actorSlot;
+		this.victimSlot = victimSlot;
+		result          = "";
 
 	}
 	
@@ -45,9 +49,9 @@ public class ActionHandler {
 				//TODO: getImageID is wrong. Fix it. 
 				game.addToQueue(CallCodes.ATTACK 
 								+ CallCodes.SEPARATOR + actor.getOwner() 
-							    + CallCodes.SEPARATOR + actor.getImageID()
+							    + CallCodes.SEPARATOR + actorSlot
 							    + CallCodes.SEPARATOR + victim.getOwner()
-							    + CallCodes.SEPARATOR + victim.getImageID()
+							    + CallCodes.SEPARATOR + victimSlot
 							    + CallCodes.SEPARATOR);
 				simualateAttack((MonsterCard) actor, (MonsterCard) victim);
 			} else {

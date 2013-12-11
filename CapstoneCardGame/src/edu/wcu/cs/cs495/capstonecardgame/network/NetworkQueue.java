@@ -1,5 +1,7 @@
 package edu.wcu.cs.cs495.capstonecardgame.network;
 
+import java.io.IOException;
+
 import android.util.Log;
 
 public class NetworkQueue  {
@@ -10,16 +12,31 @@ public class NetworkQueue  {
 	private int gameNum;
 	private int turnNum;
 	private String queue;
+	private int player;
+	private CardGameClient client;
 	
-	public NetworkQueue(int gameNum, int size) {
+	public NetworkQueue(int player, int gameNum, int size) {
 		this.capacity = size;
 		this.size     = 0;
 		this.queue    = "";
 		this.gameNum  = gameNum;
+		this.player   = player;
+		try {
+			this.client   = new CardGameClient();
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
-	public NetworkQueue(int gameNum) {
-		this(gameNum, 10);
+	public NetworkQueue(int player, int gameNum) {
+		this(player, gameNum, 10);
 	}
 	
 	public NetworkQueue(int gameNum, String string) {
@@ -31,6 +48,18 @@ public class NetworkQueue  {
 			size += 2;
 		}
 		Log.d(TAG, this.toString());
+		try {
+			this.client   = new CardGameClient();
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	
@@ -54,10 +83,10 @@ public class NetworkQueue  {
 
 	public void pushToNetwork(int turnNumber) {
 		this.turnNum = turnNumber;
-		String networkString = this.gameNum + CallCodes.SEPARATOR + turnNumber + CallCodes.SEPARATOR + this.toString();
+		String networkString = this.toString();
 		queue = "";
-		
-		Log.i(TAG, networkString);
+		client.newMove("" + this.gameNum, "" + this.player, networkString);
+		Log.i(TAG, "gameNum = " + this.gameNum + " : player = " + this.player + " : networkString = " + networkString);
 	}
 
 	@Override

@@ -1,7 +1,5 @@
 package edu.wcu.cs.cs495.capstonecardgame.activities;
 
-import java.io.IOException;
-
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
@@ -18,7 +16,7 @@ import edu.wcu.cs.cs495.capstonecardgame.network.CardGameClient;
 
 public class LoginScreen extends Activity {
 
-	private static final Object GOOD = "good";
+	private static final Object BAD = "bad";
 
 	/** TextView for the user to enter their username. */
 	private TextView usernameTextView;
@@ -54,28 +52,22 @@ public class LoginScreen extends Activity {
 		return true;
 	}
 	
-	private boolean validateLogin(String username, String password) {
+	private int validateLogin(String username, String password) {
 		Log.d("LOGIN", "Validating...");
 		CardGameClient client = null;
 		try {
 			client = new CardGameClient();
-		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.d("LOGIN", "Validating......");
+			String result = client.verifyUser(username, password);
+			Log.d("LOGIN", "Password is " + result);
+			if (!result.equals(BAD))
+				return Integer.parseInt(result);
+			else
+				return 0;
+		} catch (Exception e) {
+			Toast.makeText(this, "Cannot connect to server. Try again later. " + e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
-		Log.d("LOGIN", "Validating......");
-		String result = client.verifyUser(username, password);
-		Log.d("LOGIN", "Password is " + result);
-		if (result.equals(GOOD))
-			return true;
-		else
-			return false;
+		return 0;
 	}
 	
 	private String encrypt(String text) {
@@ -99,15 +91,18 @@ public class LoginScreen extends Activity {
 			Toast.makeText(this, "Enter a username.", Toast.LENGTH_SHORT).show();
 		} else if (password.equals("")) {
 			Toast.makeText(this, "Enter a password.", Toast.LENGTH_SHORT).show();
-		} else {		
-			if (validateLogin(username, password)) {
+		} else {
+			int userId = validateLogin(username, password);
+			if (userId != 0) {
 				SharedPreferences.Editor editor = this.getPreferences(MODE_PRIVATE).edit();
 				editor.putString("username", username);
 				editor.putString("password",  password);
+				editor.putInt("userID", userId);
 				editor.putBoolean("persistant", persistantLogin.isChecked());
 				editor.commit();
 				Toast.makeText(this, "Logged in as " + username, Toast.LENGTH_SHORT);
 				Intent i = new Intent(this, CardGameMenu.class);
+				i.putExtra("userId", userId);
 				this.startActivity(i);
 			} else {
 				Toast.makeText(this, "Invalid Username/Password Combonation", Toast.LENGTH_SHORT).show();

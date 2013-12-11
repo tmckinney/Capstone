@@ -36,6 +36,8 @@ public class DeckBuilder {
 		cur.moveToFirst();
 		totalCards += cur.getCount();
 		
+		Log.d("DECK", "totalCards = " + totalCards);
+		
 		deck = new Deck(totalCards, false);
 		
 		while (!cur.isAfterLast()) {

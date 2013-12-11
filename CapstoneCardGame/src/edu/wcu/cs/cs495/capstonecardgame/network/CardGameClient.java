@@ -5,8 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import android.util.Log;
-
 /**
  * This class is the client that attempt to link with the finger protocol with
  * user inputed arguments.
@@ -30,6 +28,8 @@ public class CardGameClient {
     /** A string that is an error message for incorrect command line args. */
     	private final static String USAGE_ERROR = "Usage: FingerTCP "
     			+ "<hostname> [<port>] [<user>]";
+
+	private static final String SERVER = "192.168.1.8";
 
     /** The int entered by the user to specify the port to connect to. */
     private int port;
@@ -69,28 +69,56 @@ public class CardGameClient {
     public CardGameClient() throws IOException, 
             SecurityException, NumberFormatException {
         try {
-            clientSocket = new Socket("192.168.1.12", 8888);
+            clientSocket = new Socket(SERVER, 8888);
         } catch (Exception ex) {
-        	Log.d("CLIENT", Log.getStackTraceString(ex));
-        	Log.d("CLIENT", ex.getMessage());
         }
     }
 
-    public String pull() {
-        this.command = "p~" + 1 + "~" + 1+ "~" +  this.command;
+    public String pull(String game, String user) {
+        this.command = "p~" + game + "~" + user;
         return this.go(this.command);
     }
 
-    public String newGame(String gameSlot) {
-        return this.go("n~");
+    public String join(String game, String user) {
+        this.command = "j~" + game + "~" + user;
+        return this.go(this.command);
+    }
+    /**
+     * 
+     * @param user1 initiator of new game
+     * @param user2 person to play with
+     * @param gameSlot seed
+     * @return 
+     */
+    public int newGame(String user1, String user2, String gameSlot) {
+        this.command = "n~" + user1 + "~" + user2 + "~" + gameSlot;
+        int num = -1;
+        String check = this.go(this.command);
+        try {
+        num = this.checkForInt(check);
+        } catch (NumberFormatException nfe) {
+            num = -1;
+        }
+        return num;
     }
 
+    public String newMove(String game, String user, String move) {
+        this.command = "m~" + game +"~" + user + "~" + move;
+        return this.go(command);
+    }
+    
     public String verifyUser(String user, String pass) {
         this.command = "v~" + user + "~" + pass + "~";
         return this.go(this.command);
     }
+    
+    public String newUser(String username, String password) {
+    	this.command = "c~" + username + "~" + password;
+    	return this.go(this.command);
+    }
+    
     /**
-     * Sends to and recieves infromation from finger and displays it to the
+     * Sends to and receives information from finger and displays it to the
      * console.
      * 
      * @throws IOException
@@ -112,7 +140,7 @@ public class CardGameClient {
             recieved.append(recdLine + "\n");
             clientSocket.close();
         } catch (IOException ioe) {
-            System.out.println("error");
+            System.out.println("error: " + ioe.getStackTrace());
         }
         return recdLine;
     }
@@ -141,7 +169,7 @@ public class CardGameClient {
             System.out.print("Entered: "); for (int i = 0; i < args.length; i++) {
             System.out.print("<" + args[i] + "> "); } System.out.println();
         }
-    }   
+    }
 */
     /**
      * This method will return the integer from the passed String or throw an
